@@ -1,0 +1,119 @@
+version: '2'
+
+volumes:
+  mongo_data: {}
+  elastic_data: {}
+  postgres_data: {}
+
+services:
+
+  # --------------------
+  # Auxiliary Services
+  # --------------------
+
+  postgresdb:
+    hostname: postgresql
+    image: postgres
+    environment:
+    - POSTGRES_DB=keycloak
+    - POSTGRES_USER=keycloak
+    - POSTGRES_PASSWORD=keycloak
+    volumes:
+    - postgres_data:/var/lib/postgresql/data
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:5.4.3
+    volumes:
+      - elastic_data:/usr/share/elasticsearch/data
+    environment:
+      - cluster.name=elasticsearch
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - http.host=0.0.0.0
+      - transport.host=0.0.0.0
+      - xpack.security.enabled=false
+      - xpack.monitoring.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile: 65536
+
+  mongodb:
+    image: mongo:3.4
+    volumes:
+      - mongo_data:/data/db
+
+  # --------------------
+  # GRAVITEE Services
+  # --------------------
+
+  gravitee_gateway:
+    image: graviteeio/gateway:latest
+    hostname: gateway
+    depends_on:
+      - mongodb
+      - elasticsearch
+    volumes:
+    - ./logs/gateway:/etc/gravitee.io/log
+    - ./scripts/gateway:/etc/gravitee.io/scripts
+    ports:
+      - "8000:8082"
+    links:
+      - "mongodb:mongodb"
+      - "elasticsearch:elasticsearch"
+      - "keycloak:keycloak"
+    environment:
+      - GRAVITEE_MANAGEMENT_MONGODB_URI=mongodb://mongodb:27017/gravitee?serverSelectionTimeoutMS=5000&connectTimeoutMS=5000&socketTimeoutMS=5000
+      - GRAVITEE_REPORTERS_ELASTICSEARCH_ENDPOINTS_0=http://elasticsearch:9200
+
+  management_api:
+    hostname: management-api
+    image: graviteeio/management-api:latest
+    depends_on:
+      - mongodb
+      - elasticsearch
+    volumes:
+      - ./logs/management-api:/home/gravitee/logs
+    ports:
+      - "8005:8083"
+    links:
+      - "mongodb:mongodb"
+      - "elasticsearch:elasticsearch"
+    environment:
+      - GRAVITEE_MANAGEMENT_MONGODB_URI=mongodb://mongodb:27017/gravitee?serverSelectionTimeoutMS=5000&connectTimeoutMS=5000&socketTimeoutMS=5000
+      - GRAVITEE_ANALYTICS_ELASTICSEARCH_ENDPOINTS_0=http://elasticsearch:9200
+
+  management_ui:
+    image: graviteeio/management-ui:latest
+    hostname: management-ui
+    ports:
+      - "8002:80"
+    links:
+      - "management_api:management-api"
+    volumes:
+      - ./logs/management-ui:/var/log/httpd
+    environment:
+      - MGMT_API_URL=http:\/\/localhost:8005\/management\/
+
+  # --------------------
+  # Keycloak Services
+  # --------------------
+
+  keycloak:
+    hostname: keycloak
+    image: jboss/keycloak
+    links:
+      - "postgresdb:postgresql"
+    environment:
+      - KEYCLOAK_USER=admin
+      - KEYCLOAK_PASSWORD=admin
+      - KEYCLOAK_HOSTNAME=keycloak
+      - DB_ADDR=postgresql
+      - DB_PORT=5432
+      - DB_DATABASE=keycloak
+      - DB_USER=keycloak
+      - DB_PASSWORD=keycloak
+      - ROOT_LOGLEVEL=INFO
+    ports:
+      - "7070:8080"

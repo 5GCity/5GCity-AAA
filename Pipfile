@@ -1,0 +1,13 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+importlib_resources = "~=1.0"
+requests = "~=2.19"
+
+[dev-packages]
+
+[requires]
+python_version = "3.7"
