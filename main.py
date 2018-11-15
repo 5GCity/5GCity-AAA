@@ -1,6 +1,7 @@
 import argparse
 
 from commands.docker import DockerBuilder
+from commands.gravitee import GraviteeBuilder
 from commands.keycloak import KeyCloakBuilder
 
 # TODO: Log and catch exceptions
@@ -11,7 +12,8 @@ from commands.keycloak import KeyCloakBuilder
 # === Script Commands ===
 COMMANDS = {
     'docker': DockerBuilder,
-    'keycloak': KeyCloakBuilder
+    'keycloak': KeyCloakBuilder,
+    'gravitee': GraviteeBuilder
 }
 
 

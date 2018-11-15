@@ -96,7 +96,6 @@ class KeyCloak:
 
     # === Import Methods ===
     def import_realm(self, file):
-
         with open(file, 'r') as file:
             realm = json.load(file)
         r = requests.post(self.ENDPOINTS['realm'], headers=self.auth_header, json=realm)

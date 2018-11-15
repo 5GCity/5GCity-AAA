@@ -1,0 +1,30 @@
+{
+  "realm" : "5gcity",
+  "users" : [ {
+    "id" : "e9616e6c-bec1-4e8c-bf25-a6a0047af207",
+    "createdTimestamp" : 1542276185065,
+    "username" : "admin",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : true,
+    "firstName" : "Tiago",
+    "lastName" : "Teixeira",
+    "email" : "tteixeira@ubiwhere.com",
+    "credentials" : [ {
+      "type" : "password",
+      "hashedSaltedValue" : "ODRTXR+Biyz9BQW1dxV/W58wFMkb6BuHAGl9Fw97SFx6+100hVlhAxhNNI7qirbTAU9D2e3KAKc4AqnNse5mjg==",
+      "salt" : "djkpUmLf9EyAERi154us9A==",
+      "hashIterations" : 27500,
+      "counter" : 0,
+      "algorithm" : "pbkdf2-sha256",
+      "digits" : 0,
+      "period" : 0,
+      "createdDate" : 1542294985975,
+      "config" : { }
+    } ],
+    "disableableCredentialTypes" : [ "password" ],
+    "requiredActions" : [ ],
+    "notBefore" : 0,
+    "groups" : [ ]
+  } ]
+}

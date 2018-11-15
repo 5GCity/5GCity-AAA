@@ -11,3 +11,4 @@ requests = "~=2.19"
 
 [requires]
 python_version = "3.7"
+docker = "~=3.5.1"
