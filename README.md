@@ -46,6 +46,7 @@ $ source .bash_profile
 Use local Python 3.7.1 in 5GCity-AAA directory:
 
 ```
+5GCity-AAA$ pyenv install 3.7.1
 5GCity-AAA$ pyenv local 3.7.1
 ```
 
