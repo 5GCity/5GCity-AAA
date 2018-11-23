@@ -19,6 +19,8 @@ import and export tools.
 
 ### Installation
 
+#### Fedora
+
 The presented solution uses python3 as environment and Pipenv to manage its environment.
 
 ```
@@ -29,10 +31,48 @@ $ sudo dnf install pipenv
 $ pipenv install
 ```
 
+#### Ubuntu 16.04
+
+Install pyenv (project requires Python 3.7.1 not available in Xenial)
+
+```
+$ git clone https://github.com/pyenv/pyenv.git ~/.pyenv
+$ echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bash_profile
+$ echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bash_profile
+$ echo -e 'if command -v pyenv 1>/dev/null 2>&1; then\n  eval "$(pyenv init -)"\nfi' >> ~/.bash_profile
+$ source .bash_profile
+```
+
+Use local Python 3.7.1 in 5GCity-AAA directory:
+
+```
+5GCity-AAA$ pyenv local 3.7.1
+```
+
+Setup virtual environment:
+
+```
+5GCity-AAA$ python -m venv venv
+5GCity-AAA$ source venv/bin/activate
+(venv) 5GCity-AAA$ pip install --upgrade pip
+```
+
+Use virtual environment pip to install pipenv:
+
+```
+(venv) 5GCity-AAA$ pip install pipenv
+```
+
+Install pipenv dependencies:
+
+```
+(venv) 5GCity-AAA$ pipenv install
+```
+
 ### Configuration
 
 Currently there are two points of configuration for this solution, the docker compose file and the etc/conf.ini. It's
-intended to be developed a single point of configuration for all the ecosystem. 
+intended to be developed a single point of configuration for all the ecosystem.
 
 ### Execution
 
