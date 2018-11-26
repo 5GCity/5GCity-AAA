@@ -14,7 +14,7 @@ class KeyCloakBuilder(Command):
     NAME = 'keycloak'
 
     @classmethod
-    def build_parser(cls, parser):
+    def build_parser(mcs, parser):
         keycloak_group = parser.add_mutually_exclusive_group(required=False)
 
         # Old import and export methods from the API

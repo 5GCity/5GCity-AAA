@@ -10,7 +10,7 @@ class DockerBuilder(Command):
     COMPOSE_DIR = os.path.dirname(aaa_compose.__file__)
 
     COMMAND_MAPPER = {
-        'start': f'docker-compose -f {COMPOSE_DIR}/compose-aaa.yml up',
+        'start': f'docker-compose -f {COMPOSE_DIR}/compose-aaa.yml up --build',
         'stop': f'docker-compose -f {COMPOSE_DIR}/compose-aaa.yml stop',
         'shutdown': f'docker-compose -f {COMPOSE_DIR}/compose-aaa.yml rm -fv'
     }

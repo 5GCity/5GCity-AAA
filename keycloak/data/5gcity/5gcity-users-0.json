@@ -1,29 +1,71 @@
 {
   "realm" : "5gcity",
   "users" : [ {
-    "id" : "e9616e6c-bec1-4e8c-bf25-a6a0047af207",
-    "createdTimestamp" : 1542276185065,
+    "id" : "b45595b5-3a32-4c1d-82d3-8d675599ce5a",
+    "createdTimestamp" : 1542302450180,
     "username" : "admin",
     "enabled" : true,
     "totp" : false,
     "emailVerified" : true,
-    "firstName" : "Tiago",
-    "lastName" : "Teixeira",
-    "email" : "tteixeira@ubiwhere.com",
+    "firstName" : "admin",
+    "lastName" : "admin",
+    "email" : "5gcityadmin@ubiwhere.com",
+    "attributes" : {
+      "tenant_label" : [ "Administration" ],
+      "os_id" : [ "5bea9adcd306de4e74c0bbcd" ]
+    },
     "credentials" : [ {
       "type" : "password",
-      "hashedSaltedValue" : "ODRTXR+Biyz9BQW1dxV/W58wFMkb6BuHAGl9Fw97SFx6+100hVlhAxhNNI7qirbTAU9D2e3KAKc4AqnNse5mjg==",
-      "salt" : "djkpUmLf9EyAERi154us9A==",
+      "hashedSaltedValue" : "E83KFM8NKn+eJLm3gAV9ArKvJzXABW6xlc1e3wG1W2uSb7CqCbXG4R9MFycHvLNHmrA3d7uDTiqjhnBDLjwpmA==",
+      "salt" : "VwEHj76T5yuk4roNoV96dw==",
       "hashIterations" : 27500,
       "counter" : 0,
       "algorithm" : "pbkdf2-sha256",
       "digits" : 0,
       "period" : 0,
-      "createdDate" : 1542294985975,
+      "createdDate" : 1542302470882,
       "config" : { }
     } ],
     "disableableCredentialTypes" : [ "password" ],
     "requiredActions" : [ ],
+    "realmRoles" : [ "offline_access", "Administrator", "uma_authorization" ],
+    "clientRoles" : {
+      "account" : [ "manage-account", "view-profile" ]
+    },
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
+    "id" : "e198800e-4679-4c6a-9a7e-92d974ed9041",
+    "createdTimestamp" : 1542302561829,
+    "username" : "user",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : true,
+    "firstName" : "user",
+    "lastName" : "user",
+    "email" : "user5gcity@ubiwhere.com",
+    "attributes" : {
+      "tenant_label" : [ "UbiTenant" ],
+      "os_id" : [ "5bead80ad306de573676b28b" ]
+    },
+    "credentials" : [ {
+      "type" : "password",
+      "hashedSaltedValue" : "cNRAFYAqv/7zx2jqb7MFNBAGlPInyVzzFGXOMj+9ntzjEbSSfNnEnVXenyJRwutbrv9sq+MiAjoy1IiQCJR16A==",
+      "salt" : "U7gjpiEC+25/C9UzoFEhFA==",
+      "hashIterations" : 27500,
+      "counter" : 0,
+      "algorithm" : "pbkdf2-sha256",
+      "digits" : 0,
+      "period" : 0,
+      "createdDate" : 1542302612435,
+      "config" : { }
+    } ],
+    "disableableCredentialTypes" : [ "password" ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "User", "offline_access", "uma_authorization" ],
+    "clientRoles" : {
+      "account" : [ "manage-account", "view-profile" ]
+    },
     "notBefore" : 0,
     "groups" : [ ]
   } ]

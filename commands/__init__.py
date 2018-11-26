@@ -5,7 +5,6 @@ from abc import ABCMeta, abstractclassmethod
 class Command(ABCMeta):
 
     @classmethod
-    @abstractclassmethod
     def build_parser(mcs, parser):
         pass
 

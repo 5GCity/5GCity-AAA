@@ -1,0 +1,274 @@
+{
+    "name": "Slice Manager API",
+    "version": "0.1.0",
+    "description": "This API provides interaction between the 5GCity platform and the Slice Manager.",
+    "visibility": "PUBLIC",
+    "tags": [],
+    "proxy": {
+        "context_path": "/slicemanagerapi",
+        "strip_context_path": false,
+        "loggingMode": "NONE",
+        "groups": [
+            {
+                "name": "default",
+                "endpoints": [
+                    {
+                        "name": "default",
+                        "target": "http://5gcity-slave1.i2cat.net:8989/api/v0.1/",
+                        "weight": 1,
+                        "backup": false,
+                        "type": "HTTP",
+                        "http": {
+                            "connectTimeout": 5000,
+                            "idleTimeout": 60000,
+                            "keepAlive": true,
+                            "readTimeout": 10000,
+                            "pipelining": false,
+                            "maxConcurrentConnections": 100,
+                            "useCompression": true,
+                            "followRedirects": false
+                        }
+                    }
+                ],
+                "load_balancing": {
+                    "type": "ROUND_ROBIN"
+                }
+            }
+        ],
+        "cors": {
+            "enabled": true,
+            "allowCredentials": false,
+            "allowOrigin": [
+                "*"
+            ],
+            "allowHeaders": [
+                "authorization",
+                "content-type"
+            ],
+            "allowMethods": [
+                "DELETE",
+                "POST",
+                "GET",
+                "PATCH"
+            ],
+            "exposeHeaders": [],
+            "maxAge": -1
+        }
+    },
+    "paths": {
+        "/virtual_wifi_access_point/:virtual_wifi_access_point_id": [],
+        "/virtual_wifi_access_point": [],
+        "/user/:user_id": [],
+        "/user": [],
+        "/slice/:slice_id": [
+            {
+                "methods": [
+                    "GET"
+                ],
+                "groovy": {
+                    "onResponseScript": "import groovy.json.JsonSlurper\nimport io.gravitee.policy.groovy.PolicyResult.State\n\ndef jsonSlurper = new JsonSlurper();\n\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload'])\ndef user_id = auth_content.os_id\n\ndef user_roles = auth_content.realm_access.roles\n\nif (!user_roles.contains('User')) {\n\n    result.state = State.FAILURE\n    result.code = 403\n\n}\n\nif (!user_roles.contains('Administrator') && user_roles.contains('User')) {\n    // List Tenant Related\n    // Users and not admins can only search for owned resource\n    def content = jsonSlurper.parseText(response.content)\n    if(!content.contains('user_id') || content.user_id != user_id){\n        result.state = State.FAILURE\n        result.code = 403\n    }\n}\n"
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            }
+        ],
+        "/slic3": [
+            {
+                "methods": [
+                    "GET"
+                ],
+                "groovy": {
+                    "onRequestScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport io.gravitee.policy.api.PolicyChain;\nimport groovy.json.JsonSlurper\nimport groovy.json.JsonOutput\n\ndef jsonSlurper = new JsonSlurper();\n\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef username = auth_content.tenant;\ndef user_id = auth_content.os_id;\n\ndef user_roles = auth_content.realm_access.roles\n\nif(!user_roles.contains('User')){\n\n  \tresult.state = State.FAILURE;\n    result.code = 403;\n\n}\n\n\nif(!user_roles.contains('Administrator') && user_roles.contains('User')){\n\t// List Tenant Related\n\t// Users and not admins can only search for owned resource\n\trequest.parameters().clear();\n\trequest.parameters().put('user_id', Collections.singletonList(user_id));\n}\n\n",
+                    "onResponseContentScript": ""
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            },
+            {
+                "methods": [
+                    "POST"
+                ],
+                "groovy": {
+                    "onRequestContentScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport io.gravitee.policy.api.PolicyChain;\nimport groovy.json.JsonSlurper\nimport groovy.json.JsonOutput\n\ndef jsonSlurper = new JsonSlurper();\n\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef username = auth_content.tenant;\ndef user_id = auth_content.os_id;\n\ndef request_content = jsonSlurper.parseText(request.content);\nif (!request_content){\n\tresult.state = State.FAILURE;\n    \tresult.code = 400;\n}\n\n// Add user information\nrequest_content.user_id = user_id;\n\nreturn JsonOutput.toJson(request_content);"
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            }
+        ],
+        "/sdn_wifi_access_point/:sdn_wifi_access_point_id": [],
+        "/sdn_wifi_access_point": [],
+        "/physical_network/:physical_network_id": [],
+        "/physical_network": [
+            {
+                "methods": [
+                    "GET"
+                ],
+                "groovy": {
+                    "onResponseContentScript": "import groovy.json.JsonOutput\nimport groovy.json.JsonSlurper\n\ndef jsonSlurper = new JsonSlurper()\n\ndef content = jsonSlurper.parseText(response.content)\n\ncontent.each {\n    it.remove('physical_network_data')\n    it.remove('user_id')\n}\n\nreturn JsonOutput.toJson(content)",
+                    "onRequestScript": ""
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            }
+        ],
+        "/openstack_vlan/:openstack_vlan_id": [],
+        "/openstack_vlan": [
+            {
+                "methods": [
+                    "GET"
+                ],
+                "groovy": {
+                    "onRequestScript": "import groovy.json.JsonSlurper\nimport io.gravitee.policy.groovy.PolicyResult.State\n\ndef jsonSlurper = new JsonSlurper();\n\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload'])\ndef user_id = auth_content.os_id\n\ndef user_roles = auth_content.realm_access.roles\n\nif (!user_roles.contains('User')) {\n\n    result.state = State.FAILURE\n    result.code = 403\n\n}\n\nif (!user_roles.contains('Administrator') && user_roles.contains('User')) {\n    // List Tenant Related\n    // Users and not admins can only search for owned resource\n    request.parameters().clear()\n    request.parameters().put('user_id', Collections.singletonList(user_id))\n}"
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            }
+        ],
+        "/openstack_project/:openstack_project_id": [],
+        "/openstack_project": [
+            {
+                "methods": [
+                    "POST"
+                ],
+                "groovy": {
+                    "onRequestContentScript": "import groovy.json.JsonOutput\nimport groovy.json.JsonSlurper\nimport io.gravitee.policy.groovy.PolicyResult.State\n\ndef jsonSlurper = new JsonSlurper()\n\n\ndef request_content = jsonSlurper.parseText(request.content)\nif (!request_content) {\n    result.state = State.FAILURE\n    result.code = 400\n}\n\n// Add user information\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload'])\ndef user_id = auth_content.os_id\nprintln(user_id)\nrequest_content.user_id = user_id\nrequest_content.password = 'password'\n\nreturn JsonOutput.toJson(request_content)\n",
+                    "onResponseContentScript": "import groovy.json.JsonOutput\nimport groovy.json.JsonSlurper\n\ndef jsonSlurper = new JsonSlurper()\n\ndef content = jsonSlurper.parseText(response.content)\n\ncontent.remove('osm_vim_id')\ncontent.remove('os_user_id')\ncontent.remove('os_project_id')\n\n\nreturn JsonOutput.toJson(content)"
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            },
+            {
+                "methods": [
+                    "GET"
+                ],
+                "groovy": {
+                    "onRequestScript": "import groovy.json.JsonSlurper\nimport io.gravitee.policy.groovy.PolicyResult.State\n\ndef jsonSlurper = new JsonSlurper();\n\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload'])\ndef user_id = auth_content.os_id\n\ndef user_roles = auth_content.realm_access.roles\n\nif (!user_roles.contains('User')) {\n\n    result.state = State.FAILURE\n    result.code = 403\n\n}\n\nif (!user_roles.contains('Administrator') && user_roles.contains('User')) {\n    // List Tenant Related\n    // Users and not admins can only search for owned resource\n    request.parameters().clear()\n    request.parameters().put('user_id', Collections.singletonList(user_id))\n}"
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            }
+        ],
+        "/network_service_instance/:network_service_instance_id": [],
+        "/network_service_instance": [],
+        "/network_service/:network_service_id": [],
+        "/network_service": [],
+        "/compute/:compute_id": [
+            {
+                "methods": [
+                    "PUT",
+                    "DELETE",
+                    "PATCH"
+                ],
+                "groovy": {
+                    "onRequestScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport io.gravitee.policy.api.PolicyChain;\nimport groovy.json.JsonSlurper\nimport groovy.json.JsonOutput\n\ndef jsonSlurper = new JsonSlurper();\n\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef username = auth_content.tenant;\ndef user_id = auth_content.os_id;\n\ndef user_roles = auth_content.realm_access.roles\n\nif(!user_roles.contains('5GCityAdmin')){\n\tresult.state = State.FAILURE;\n    \tresult.code = 403;\n}\n"
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            }
+        ],
+        "/compute": [
+            {
+                "methods": [
+                    "POST"
+                ],
+                "groovy": {
+                    "onRequestContentScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport io.gravitee.policy.api.PolicyChain;\nimport groovy.json.JsonSlurper\nimport groovy.json.JsonOutput\n\ndef jsonSlurper = new JsonSlurper();\n\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef username = auth_content.tenant;\ndef user_id = auth_content.os_id;\n\ndef user_roles = auth_content.realm_access.roles\n\n// Only admins can create computes\nif(!user_roles.contains('Administrator')){\n\tresult.state = State.FAILURE;\n    \tresult.code = 403;\n}\n\ndef request_content = jsonSlurper.parseText(request.content);\nif (!request_content){\n\tprintln \"Invalid request\";\n\tresult.state = State.FAILURE;\n    \tresult.code = 400;\n}\n\n// Add compute data\nrequest_content.compute_data = [:]\nrequest_content.compute_data.auth_url = \"http://192.168.111.195/identity/v3\";\nrequest_content.compute_data.domain_name = \"default\";\nrequest_content.compute_data.password = \"adminpass\";\nrequest_content.compute_data.project_name = \"admin\";\nrequest_content.compute_data.username = \"admin\";\n\n// Add user information\nrequest_content.user_id = user_id;\nrequest_content.name = username;\n\nreturn JsonOutput.toJson(request_content);"
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            },
+            {
+                "methods": [
+                    "GET"
+                ],
+                "groovy": {
+                    "onResponseContentScript": "import groovy.json.JsonOutput\nimport groovy.json.JsonSlurper\n\ndef jsonSlurper = new JsonSlurper()\n\ndef content = jsonSlurper.parseText(response.content)\n\ncontent.each {\n    it.remove('compute_data')\n    it.remove('user_id')\n}\n\nreturn JsonOutput.toJson(content)"
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            }
+        ],
+        "/": []
+    },
+    "services": {
+        "discovery": {
+            "enabled": false
+        }
+    },
+    "resources": [
+        {
+            "name": "oauth",
+            "type": "oauth2",
+            "enabled": true,
+            "configuration": {
+                "authorizationServerUrl": "http://localhost:8080/auth/realms/5gcity",
+                "introspectionEndpoint": "/protocol/openid-connect/token/introspect",
+                "introspectionEndpointMethod": "POST",
+                "scopeSeparator": " ",
+                "userInfoEndpoint": "/protocol/openid-connect/userinfo",
+                "userInfoEndpointMethod": "GET",
+                "useClientAuthorizationHeader": true,
+                "clientAuthorizationHeaderName": "Authorization",
+                "clientAuthorizationHeaderScheme": "Basic",
+                "tokenIsSuppliedByQueryParam": false,
+                "tokenQueryParamName": "token",
+                "tokenIsSuppliedByHttpHeader": false,
+                "tokenIsSuppliedByFormUrlEncoded": true,
+                "tokenFormUrlEncodedName": "token",
+                "clientId": "my_client",
+                "clientSecret": "348e4121-2a64-4a4c-9cc7-7111b3f25621"
+            }
+        }
+    ],
+    "path_mappings": [
+        "/network_service_instance",
+        "/network_service/:network_service_id",
+        "/virtual_wifi_access_point",
+        "/openstack_vlan/:openstack_vlan_id",
+        "/sdn_wifi_access_point/:sdn_wifi_access_point_id",
+        "/virtual_wifi_access_point/:virtual_wifi_access_point_id",
+        "/openstack_project",
+        "/openstack_project/:openstack_project_id",
+        "/",
+        "/user/:user_id",
+        "/physical_network",
+        "/compute",
+        "/user",
+        "/openstack_vlan",
+        "/sdn_wifi_access_point",
+        "/physical_network/:physical_network_id",
+        "/compute/:compute_id",
+        "/network_service",
+        "/network_service_instance/:network_service_instance_id"
+    ],
+    "members": [
+        {
+            "username": "admin",
+            "role": "PRIMARY_OWNER"
+        }
+    ],
+    "pages": [],
+    "plans": [
+        {
+            "id": "1d6e1716-e6cc-4f99-ae17-16e6cc9f9963",
+            "name": "Oauth2",
+            "description": "Plan using Oauth2",
+            "validation": "MANUAL",
+            "security": "OAUTH2",
+            "securityDefinition": "{\"extractPayload\":true,\"checkRequiredScopes\":false,\"requiredScopes\":[],\"oauthResource\":\"oauth\"}",
+            "type": "API",
+            "status": "PUBLISHED",
+            "apis": [
+                "75326f62-8314-4d34-b26f-628314fd34e6"
+            ],
+            "order": 0,
+            "characteristics": [],
+            "created_at": 1542987421928,
+            "updated_at": 1542987421928,
+            "paths": {
+                "/": []
+            },
+            "excluded_groups": []
+        }
+    ]
+}

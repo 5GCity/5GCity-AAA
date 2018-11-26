@@ -132,15 +132,17 @@ class Gravitee:
 
                 requests.post(self.ENDPOINTS['import_subscriptions'].format(api_id), auth=self.authentication,
                               params=payload)
-                requests.post(self.ENDPOINTS['apis_deploy'].format(api_id), auth=self.authentication)
-                requests.post(self.ENDPOINTS['apis_lifecycle'].format(api_id), auth=self.authentication,
-                              params={'action': 'START'})
+
+        def __start_api__():
+            requests.post(self.ENDPOINTS['apis_deploy'].format(api_id), auth=self.authentication)
+            requests.post(self.ENDPOINTS['apis_lifecycle'].format(api_id), auth=self.authentication,
+                          params={'action': 'START'})
 
         reading_directory = self.write_directory(name)
-
         api_id = __api__()
         __application__()
         __subscriptions__()
+        __start_api__()
 
     def get_plan_by_name(self, api, name):
         r = requests.get(self.ENDPOINTS['plans'].format(api), auth=self.authentication,
