@@ -6,9 +6,10 @@ name = "pypi"
 [packages]
 importlib_resources = "~=1.0"
 requests = "~=2.19"
+docker = "~=3.5.1"
 
 [dev-packages]
 
 [requires]
 python_version = "3.7"
-docker = "~=3.5.1"
+

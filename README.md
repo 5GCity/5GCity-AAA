@@ -26,6 +26,10 @@ Please install Python3.7 and Pipenv according to the desired operating system.
 Once Python3.7 and Pipenv are installed run the following command within the project folder to install project
 dependencies and the activate the Pipenv.
 
+**Note that the following commands must run within the
+project's directory**.
+
+
 ```
 $ pipenv install
 ```
@@ -80,10 +84,15 @@ pip3.7 install --user pipenv
 Currently the solution uses the following Ports:
 
 8080: Keycloak
+
 9200: Elasticsearch
+
 8000: Gravitee Gateway
+
 27017: MongoDB
+
 8083: Gravitee Management API
+
 80: Gravitee Management UI
 
 To run the solution it's needed to previously run the following command:
@@ -92,6 +101,16 @@ To run the solution it's needed to previously run the following command:
 $ sudo sysctl -w vm.max_map_count=262144
 ```
 
+The solution uses the following users:
+
+Service: username:password
+
+Keycloack: admin:admin
+
+Gravitee: admin:admin
+
+5GCity: admin:admin
+
 ### Execution
 
 To execute the ecosystem the main.py must be used. Currently it accepts three commands,
@@ -99,7 +118,8 @@ To execute the ecosystem the main.py must be used. Currently it accepts three co
  (iii) gravitee to manage the authorization and audit. Both keycloak and Gravitee commands are used to to import and
  export environments.
 
-Activate the python environment
+Within the project folder activate the python environment, **Note that the following commands must run within the
+project's directory**.
 
 ```
 $ pipenv shell
@@ -128,14 +148,16 @@ To start docker environment
 $ python main.py docker --start
 ```
 
+Once a message similar to **"Admin console listening on http://127.0.0.1:9990"** means the environment has started.
+
 To import keycloak realm
 
 ```
 $ python main.py keycloak --import_realm 5gcity
 ```
 
-Once the keycloack stars the admin console, message similar to "Admin console listening on http://127.0.0.1:9990" the
-realm was imported and Ctrl+C can be pressed.
+Once the keycloack stars the admin console, message similar to **"Admin console listening on http://127.0.0.1:9990" the
+realm was imported** and Ctrl+C can be pressed.
 
 To import Gravitee API
 
