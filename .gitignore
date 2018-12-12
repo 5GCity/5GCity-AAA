@@ -70,3 +70,9 @@ bin/
 
 # ide trash
 .idea
+
+# Custom
+venv
+Pipfile.lock
+__pycache__/
+.python-version
