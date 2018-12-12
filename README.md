@@ -19,113 +19,67 @@ import and export tools.
 
 ### Installation
 
-The presented solution uses Docker, **Python 3.7** and pipenv to manage the environment.
+#### Fedora
 
-Please install Python3.7 and Pipenv according to the desired operating system.
+The presented solution uses python3 as environment and Pipenv to manage its environment.
 
-Once Python3.7 and Pipenv are installed run the following command within the project folder to install project
-dependencies and the activate the Pipenv.
-
-**Note that the following commands must run within the
-project's directory**.
-
+```
+$ sudo dnf install pipenv
+```
 
 ```
 $ pipenv install
 ```
 
-This will activate the Pipenv environment with all its dependencies. To run the script contained in this project the
-environment must be activated.
+#### Ubuntu 16.04
+
+Install pyenv (project requires Python 3.7.1 not available in Xenial)
 
 ```
-$ pipenv shell
+$ git clone https://github.com/pyenv/pyenv.git ~/.pyenv
+$ echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bash_profile
+$ echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bash_profile
+$ echo -e 'if command -v pyenv 1>/dev/null 2>&1; then\n  eval "$(pyenv init -)"\nfi' >> ~/.bash_profile
+$ source .bash_profile
 ```
 
-#### Ubuntu Installation
-
-**Python3.7 Installation**:
+Use local Python 3.7.1 in 5GCity-AAA directory:
 
 ```
-sudo apt-get install -y build-essential
-sudo apt-get install -y checkinstall
-sudo apt-get install -y libreadline-gplv2-dev
-sudo apt-get install -y libncursesw5-dev
-sudo apt-get install -y libssl-dev
-sudo apt-get install -y libsqlite3-dev
-sudo apt-get install -y tk-dev
-sudo apt-get install -y libgdbm-dev
-sudo apt-get install -y libc6-dev
-sudo apt-get install -y libbz2-dev
-sudo apt-get install -y zlib1g-dev
-sudo apt-get install -y openssl
-sudo apt-get install -y libffi-dev
-sudo apt-get install -y python3-dev
-sudo apt-get install -y python3-setuptools
-sudo apt-get install -y wget
-
-mkdir /tmp/Python37
-cd /tmp/Python37
-
-wget https://www.python.org/ftp/python/3.7.0/Python-3.7.0.tar.xz
-tar xvf Python-3.7.0.tar.xz
-cd /tmp/Python37/Python-3.7.0
-./configure
-sudo make altinstall
+5GCity-AAA$ pyenv install 3.7.1
+5GCity-AAA$ pyenv local 3.7.1
 ```
 
+Setup virtual environment:
 
-**Pipenv Installation**
 ```
-pip3.7 install --user pipenv
+5GCity-AAA$ python -m venv venv
+5GCity-AAA$ source venv/bin/activate
+(venv) 5GCity-AAA$ pip install --upgrade pip
+```
+
+Use virtual environment pip to install pipenv:
+
+```
+(venv) 5GCity-AAA$ pip install pipenv
+```
+
+Install pipenv dependencies:
+
+```
+(venv) 5GCity-AAA$ pipenv install
 ```
 
 ### Configuration
 
-Currently the solution uses the following Ports:
-
-8080: Keycloak
-
-9200: Elasticsearch
-
-8000: Gravitee Gateway
-
-27017: MongoDB
-
-8083: Gravitee Management API
-
-80: Gravitee Management UI
-
-To run the solution it's needed to previously run the following command:
-
-```
-$ sudo sysctl -w vm.max_map_count=262144
-```
-
-The solution uses the following users:
-
-Service: username:password
-
-Keycloack: admin:admin
-
-Gravitee: admin:admin
-
-5GCity: admin:admin
+Currently there are two points of configuration for this solution, the docker compose file and the etc/conf.ini. It's
+intended to be developed a single point of configuration for all the ecosystem.
 
 ### Execution
 
-To execute the ecosystem the main.py must be used. Currently it accepts three commands,
+To execute the ecosystem the main.py must be used. Currently it accept three commands,
 (i) docker, related the ecosystem management, start and stop, (ii) keycloak related to the authentication solution and
- (iii) gravitee to manage the authorization and audit. Both keycloak and Gravitee commands are used to to import and
- export environments.
-
-Within the project folder activate the python environment, **Note that the following commands must run within the
-project's directory**.
-
-```
-$ pipenv shell
-```
-
-Check script usage
+ (iii) gravitee to manage the authorization and audit
 
 ```
 $ python main.py -h
@@ -141,28 +95,3 @@ optional arguments:
   -h, --help         show this help message and exit
 
 ```
-
-To start docker environment
-
-```
-$ python main.py docker --start
-```
-
-Once a message similar to **"Admin console listening on http://127.0.0.1:9990"** means the environment has started.
-
-To import keycloak realm
-
-```
-$ python main.py keycloak --import_realm 5gcity
-```
-
-Once the keycloack stars the admin console, message similar to **"Admin console listening on http://127.0.0.1:9990" the
-realm was imported** and Ctrl+C can be pressed.
-
-To import Gravitee API
-
-```
-$ python main.py gravitee --import_api "Slice Manager API"
-```
-
-If no message is displayed everything worked as expected.
