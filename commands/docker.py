@@ -31,9 +31,36 @@ class DockerBuilder(Command):
     @classmethod
     def execute(mcs, args):
         arg, *rest = super().execute(args)
+
+        if arg == 'start':
+            mcs.__validate__()
+
         command = mcs.COMMAND_MAPPER[arg]
 
         try:
             subprocess.run(command.split(' '))
         except KeyboardInterrupt:
             sys.exit()
+
+    @classmethod
+    def __validate__(mcs):
+        """
+        Validates ElasticSearch mmap count.
+        :return:
+                When nmap count is invalid exits with a message
+        """
+        needed_max_map_count = 262144  # TODO: Add to future configurations
+
+        with open('/proc/sys/vm/max_map_count') as f:
+            max_map_count = int(f.read())
+
+        if max_map_count < needed_max_map_count:
+            error_message = """
+            ElasticSearch needs mmap counts to be increased please run the following command:
+            
+            $ sysctl -w vm.max_map_count=262144
+            
+            For more information please visit:
+            https://www.elastic.co/guide/en/elasticsearch/reference/current/vm-max-map-count.html
+            """
+            sys.exit(error_message)
