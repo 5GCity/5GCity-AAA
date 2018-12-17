@@ -15,19 +15,19 @@ from config import ConfReader
 @dataclass
 class Gravitee:
     ENDPOINTS: ClassVar[Dict[str, str]] = {
-        'apis': '/apis',
-        'apis_deploy': '/apis/{}/deploy',
-        'apis_lifecycle': '/apis/{}',
+        'apis': 'apis',
+        'apis_deploy': 'apis/{}/deploy',
+        'apis_lifecycle': 'apis/{}',
 
-        'export_api': '/apis/{}/export',
-        'export_subscriptions': '/apis/{}/subscriptions',
-        'export_applications': '/applications/{}',
+        'export_api': 'apis/{}/export',
+        'export_subscriptions': 'apis/{}/subscriptions',
+        'export_applications': 'applications/{}',
 
-        'import_api': '/apis/import',
-        'import_applications': '/applications',
-        'import_subscriptions': '/apis/{}/subscriptions',
+        'import_api': 'apis/import',
+        'import_applications': 'applications',
+        'import_subscriptions': 'apis/{}/subscriptions',
 
-        'plans': '/apis/{}/plans'
+        'plans': 'apis/{}/plans'
     }
 
     username: str
@@ -36,10 +36,12 @@ class Gravitee:
 
     @classmethod
     def build(cls):
-        arguments = ['username', 'password', 'base_url']
+        arguments = ['username', 'password']
         _args = []
         for arg in arguments:
             _args.append(ConfReader().get('gravitee', arg))
+
+        _args.append(ConfReader().get_docker_service('management_ui', 'MGMT_API_URL'))
 
         instance = Gravitee(*_args)
         for key in instance.ENDPOINTS.keys():

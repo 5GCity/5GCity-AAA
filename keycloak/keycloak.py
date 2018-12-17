@@ -25,10 +25,12 @@ class KeyCloak:
 
     @classmethod
     def build(cls):
-        arguments = ['username', 'password', 'client_id', 'base_url']
-        _args = []
-        for arg in arguments:
-            _args.append(ConfReader().get('keycloack', arg))
+        _args = [
+            ConfReader().get_docker_service('keycloak', 'KEYCLOAK_USER'),
+            ConfReader().get_docker_service('keycloak', 'KEYCLOAK_PASSWORD'),
+            'admin-cli',
+            ConfReader().get_docker_service('keycloak', 'AAA_AUTH_BASE_URL')
+        ]
 
         instance = KeyCloak(*_args)
         for key in instance.ENDPOINTS.keys():

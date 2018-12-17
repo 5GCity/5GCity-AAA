@@ -1,6 +1,7 @@
 import configparser
 from ast import literal_eval as le
 
+import yaml
 from importlib_resources import read_text
 
 import etc
@@ -29,6 +30,8 @@ class ConfReader(metaclass=Singleton):
         self.parser = configparser.ConfigParser(allow_no_value=True)
         self.parser.read_string(read_text(etc, 'conf.ini'))
 
+        self.docker_parse = yaml.load(open('aaa_compose/compose-aaa.yml'))
+
     def get(self, section, config):
         return le(self.parser.get(section, config))
 
@@ -41,3 +44,9 @@ class ConfReader(metaclass=Singleton):
         for key, value in configs_list:
             configs[key] = self.get(section, key)
         return configs
+
+    def get_docker_service(self, service, config, section='environment'):
+        for arg in self.docker_parse['services'][service][section]:
+            if config in arg:
+                return arg.split("=")[1]
+        return None

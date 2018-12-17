@@ -23,7 +23,6 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   elasticsearch:
-    network_mode: host
     image: docker.elastic.co/elasticsearch/elasticsearch:5.4.3
     volumes:
       - elastic_data:/usr/share/elasticsearch/data
@@ -40,12 +39,15 @@ services:
         soft: -1
         hard: -1
       nofile: 65536
+    ports:
+      - "9200:9200"
 
   mongodb:
-    network_mode: host
     image: mongo:3.4
     volumes:
       - mongo_data:/data/db
+    ports:
+      - "27017:27017"
 
   # --------------------
   # GRAVITEE Services
@@ -66,8 +68,8 @@ services:
       - GRAVITEE_REPORTERS_ELASTICSEARCH_ENDPOINTS_0=http://0.0.0.0:9200
 
   management_api:
-    network_mode: host
     image: graviteeio/management-api:latest
+    network_mode: host
     depends_on:
       - mongodb
       - elasticsearch
@@ -78,12 +80,16 @@ services:
       - GRAVITEE_ANALYTICS_ELASTICSEARCH_ENDPOINTS_0=http://0.0.0.0:9200
 
   management_ui:
-    network_mode: host
     image: graviteeio/management-ui:latest
     volumes:
       - ./logs/management-ui:/var/log/httpd
     environment:
-      - MGMT_API_URL=http:\/\/localhost:8083\/management\/
+      - MGMT_API_URL=http://localhost:8083/management/
+    links:
+      - "management_api:management_api"
+    ports:
+      - "8092:80"
+
 
   # --------------------
   # Keycloak Services
@@ -104,6 +110,8 @@ services:
       - DB_DATABASE=keycloak
       - DB_USER=keycloak
       - DB_PASSWORD=keycloak
+      - DB_PORT=5432
       - ROOT_LOGLEVEL=INFO
+      - AAA_AUTH_BASE_URL=http://localhost:8080/auth
     ports:
       - "8080:8080"

@@ -117,31 +117,11 @@ Currently the configuration is hold in two files:
  * etc/conf.ini - File that is used by the python script to perform the import and export both realms and APIs.
  * aaa_compose/compose-aaa.yml - File that is used by docker to mount the environment that will run the solution.
 
-Both of these files must be synced in order to have all functions working.
-
 
 #### conf.ini
 
-Within the conf.ini file there are two configuration sections, keycloak and gravitee.
+Within the conf.ini file there is a single configuration section, gravitee.
 
-##### Keycloak
-
-The keycloak section contains (i) the database configurations used by keycloak to store the realms and user information.
-
-* DB_VENDOR - database type used
-* DB_ADDR - database address
-* DB_DATABASE - database name
-* DB_USER - database user
-* DB_PASSWORD - user's password
-* DB_PORT - database port
-
-(ii) keycloak admin information such username and password, the client which will perform the import and export
-operations and keycloak's base URL
-
-* username - keycloak admin username 
-* password - admin password
-* client_id - client id that will perform import and export operations
-* base_url - keycloak's base URL
 
 ##### Gravitee
 
@@ -149,7 +129,6 @@ The gravitee section contains Gravitee Management API access information
 
 * username - Gravitee admin username
 * password - Gravitee admin password
-* base_url - API management URL
 
 #### compose-aaa.yml
 
@@ -164,44 +143,39 @@ Changes in MongoDB and Elasticsearch must be replicated on the Gravitee variable
 * GRAVITEE_MANAGEMENT_MONGODB_URI
 * GRAVITEE_REPORTERS_ELASTICSEARCH_ENDPOINTS_0
 
-Changes on the POSTGRES must be replicated on the Keycloak's docker configuration and in the etc/conf.ini
+Changes on the POSTGRES must be replicated on the Keycloak's section
 
 * DB_ADDR
 * DB_DATABASE
 * DB_USER
 * DB_PASSWORD
+* DB_PORT
 
 ##### GRAVITEE Services
 
 The gravitee is composed by three components, the gateway, the management api which will manage the Gravitee APIs and 
 the UI which is a web interface to configure Gravitee.
 
-All of these services use the host network.
-
 More configurations can be found on Gravitee's documentation page:
 https://docs.gravitee.io/apim_overview_introduction.html
 
 ##### Keycloak Services
 
-This section only contains the keycloak docker configurations. The container will be linked to the POSTGRES container.
-Any change to the following configurations must be reflectd on the etc/conf.ini       
-
-* KEYCLOAK_USER -> username
-* KEYCLOAK_PASSWORD -> password
-
-
-More information about configuration can be found on keycloak docker page https://hub.docker.com/r/jboss/keycloak/ 
+Information about configuration can be found on keycloak docker page https://hub.docker.com/r/jboss/keycloak/ 
 
 #### Port Mapping
 
 | Service             | Port          | Network
 | -------------       | ------------- | ------------- | 
+| MongoDB             | 27017         | Docker        |
 | MongoDB             | 27017         | Host          |
+| ElasticSearch       | 9200          | Docker        |
 | ElasticSearch       | 9200          | Host          |
 | POSTGRES            | 5432          | Docker        |
 | Gravitee GW         | 8000          | Host          |
 | Gravitee Management | 8083          | Host          |
-| Gravitee UI         | 80            | Host          |
+| Gravitee UI         | 80            | Docker        |
+| Gravitee UI         | 8092          | Host          |
 | keycloak            | 8080          | Host          |
 | keycloack           | 8080          | Docker        |
 
