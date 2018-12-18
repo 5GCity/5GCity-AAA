@@ -228,6 +228,7 @@ $ python main.py docker --start
 
 Once a message similar to **"Admin console listening on http://127.0.0.1:9990"** means the environment has started.
 
+
 To import keycloak realm
 
 ```
@@ -236,6 +237,15 @@ $ python main.py keycloak --import_realm 5gcity
 
 Once the keycloak stars the admin console, message similar to **"Admin console listening on http://127.0.0.1:9990" the
 realm was imported** and Ctrl+C can be pressed.
+
+**NOTE** 
+By default keycloak uses https in order to disable it the user must import the presented master realm with the SSL
+disabled.
+
+```
+$ python main.py keycloak --import_realm master
+```
+
 
 To import Gravitee API
 
