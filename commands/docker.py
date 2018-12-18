@@ -26,8 +26,6 @@ class DockerBuilder(Command):
         docker_group.add_argument('--shutdown', help='Removes all AAA containers and volumes', action='store_true')
         docker_group.add_argument('--restart', help='Performs the shutdown and start commands', action='store_true')
 
-        return parser
-
     @classmethod
     def execute(mcs, args):
         arg, *rest = super().execute(args)

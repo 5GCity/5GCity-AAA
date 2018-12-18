@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 from dataclasses import dataclass
 from typing import ClassVar, Dict
 
@@ -35,13 +36,13 @@ class Gravitee:
     base_url: str
 
     @classmethod
-    def build(cls):
+    def build(cls, base_url):
         arguments = ['username', 'password']
         _args = []
         for arg in arguments:
             _args.append(ConfReader().get('gravitee', arg))
 
-        _args.append(ConfReader().get_docker_service('management_ui', 'MGMT_API_URL'))
+        _args.append(base_url)
 
         instance = Gravitee(*_args)
         for key in instance.ENDPOINTS.keys():
@@ -61,11 +62,21 @@ class Gravitee:
             raise ValueError("Provided API don't exist")
         return path
 
+    @staticmethod
+    def __validate_response__(response):
+        if response.status_code <= 299:
+            return
+        exit_message = f"Command error with code {response.status_code} "
+        if response.text:
+            exit_message += f"and message {response.text}"
+        sys.exit(exit_message)
+
     def export_api(self, name):
 
         def __api_id__():
             # Collect API id
             r = requests.get(self.ENDPOINTS['apis'], params={'name': name}, auth=self.authentication)
+            Gravitee.__validate_response__(r)
             data = r.json()
             if not data:
                 raise ValueError("The provided name don't exist")
@@ -74,6 +85,7 @@ class Gravitee:
         def __api__():
             # Export the API
             r = requests.get(self.ENDPOINTS['export_api'].format(api_id), auth=self.authentication)
+            Gravitee.__validate_response__(r)
 
             with open(os.path.join(self.write_directory(name), "api.json"), 'w') as f:
                 f.write(json.dumps(r.json(), indent=4))
@@ -81,6 +93,7 @@ class Gravitee:
         def __subscriptions__():
             # Export Subscriptions
             r = requests.get(self.ENDPOINTS['export_subscriptions'].format(api_id), auth=self.authentication)
+            Gravitee.__validate_response__(r)
             data = r.json()
             with open(os.path.join(self.write_directory(name), "subscriptions.json"), 'w') as f:
                 f.write(json.dumps(data, indent=4))
@@ -92,6 +105,7 @@ class Gravitee:
             data = []
             for app in applications:
                 r = requests.get(self.ENDPOINTS['export_applications'].format(app), auth=self.authentication)
+                Gravitee.__validate_response__(r)
 
                 to_remove = ('id', 'status', 'created_at', 'updated_at', 'owner')
                 app_data = r.json()
@@ -113,6 +127,8 @@ class Gravitee:
             with open(os.path.join(reading_directory, 'api.json'), 'r') as f:
                 data = json.load(f)
             r = requests.post(self.ENDPOINTS['import_api'], auth=self.authentication, json=data)
+            Gravitee.__validate_response__(r)
+
             return r.json()['id']
 
         def __application__():
@@ -120,7 +136,8 @@ class Gravitee:
                 data = json.load(f)
 
             for app in data:
-                requests.post(self.ENDPOINTS['import_applications'], auth=self.authentication, json=app)
+                r = requests.post(self.ENDPOINTS['import_applications'], auth=self.authentication, json=app)
+                Gravitee.__validate_response__(r)
 
         def __subscriptions__():
             with open(os.path.join(reading_directory, 'subscriptions.json'), 'r') as f:
@@ -132,13 +149,16 @@ class Gravitee:
                     'plan': self.get_plan_by_name(api_id, data['metadata'][sub['plan']])
                 }
 
-                requests.post(self.ENDPOINTS['import_subscriptions'].format(api_id), auth=self.authentication,
-                              params=payload)
+                r = requests.post(self.ENDPOINTS['import_subscriptions'].format(api_id), auth=self.authentication,
+                                  params=payload)
+                Gravitee.__validate_response__(r)
 
         def __start_api__():
-            requests.post(self.ENDPOINTS['apis_deploy'].format(api_id), auth=self.authentication)
-            requests.post(self.ENDPOINTS['apis_lifecycle'].format(api_id), auth=self.authentication,
-                          params={'action': 'START'})
+            r = requests.post(self.ENDPOINTS['apis_deploy'].format(api_id), auth=self.authentication)
+            Gravitee.__validate_response__(r)
+            r = requests.post(self.ENDPOINTS['apis_lifecycle'].format(api_id), auth=self.authentication,
+                              params={'action': 'START'})
+            Gravitee.__validate_response__(r)
 
         reading_directory = self.write_directory(name)
         api_id = __api__()
@@ -149,6 +169,7 @@ class Gravitee:
     def get_plan_by_name(self, api, name):
         r = requests.get(self.ENDPOINTS['plans'].format(api), auth=self.authentication,
                          params={'name': name})
+        Gravitee.__validate_response__(r)
 
         for plan in r.json():
             if plan['name'] == name['name']:
@@ -156,6 +177,7 @@ class Gravitee:
 
     def get_app_by_name(self, name):
         r = requests.get(self.ENDPOINTS['import_applications'], auth=self.authentication)
+        Gravitee.__validate_response__(r)
         for app in r.json():
             if app['name'] == name['name']:
                 return app['id']
