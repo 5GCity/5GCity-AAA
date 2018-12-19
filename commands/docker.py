@@ -12,7 +12,7 @@ class DockerBuilder(Command):
     COMMAND_MAPPER = {
         'start': f'docker-compose -f {COMPOSE_DIR}/compose-aaa.yml up --build',
         'stop': f'docker-compose -f {COMPOSE_DIR}/compose-aaa.yml stop',
-        'shutdown': f'docker-compose -f {COMPOSE_DIR}/compose-aaa.yml rm -fv'
+        'shutdown': f'docker-compose -f {COMPOSE_DIR}/compose-aaa.yml down -v --remove-orphans'
     }
 
     NAME = 'Docker'
