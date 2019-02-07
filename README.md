@@ -17,6 +17,11 @@ enforcement and auditing.
 The current application provides a management client for 5GCity-AAA allowing to start and stop the environment and
 import and export tools.
 
+### Requirements
+
+AAA current installation uses a single virtual machine with 1 vCPU and 3 GB of RAM. It's not recommended less than these
+requirements.
+
 ### Installation
 
 #### Fedora
