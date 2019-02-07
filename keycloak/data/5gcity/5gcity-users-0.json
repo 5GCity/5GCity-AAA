@@ -28,7 +28,7 @@
     } ],
     "disableableCredentialTypes" : [ "password" ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "offline_access", "Administrator", "uma_authorization" ],
+    "realmRoles" : [ "offline_access", "Administrator" ],
     "clientRoles" : {
       "account" : [ "manage-account", "view-profile" ]
     },
@@ -62,7 +62,7 @@
     } ],
     "disableableCredentialTypes" : [ "password" ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "User", "offline_access", "uma_authorization" ],
+    "realmRoles" : [ "User" ],
     "clientRoles" : {
       "account" : [ "manage-account", "view-profile" ]
     },
