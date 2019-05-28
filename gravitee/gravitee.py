@@ -75,7 +75,7 @@ class Gravitee:
 
         def __api_id__():
             # Collect API id
-            r = requests.get(self.ENDPOINTS['apis'], params={'name': name}, auth=self.authentication)
+            r = requests.get(self.ENDPOINTS['apis'], params={'name': name}, auth=self.authentication, verify=False)
             Gravitee.__validate_response__(r)
             data = r.json()
             if not data:
@@ -84,7 +84,7 @@ class Gravitee:
 
         def __api__():
             # Export the API
-            r = requests.get(self.ENDPOINTS['export_api'].format(api_id), auth=self.authentication)
+            r = requests.get(self.ENDPOINTS['export_api'].format(api_id), auth=self.authentication, verify=False)
             Gravitee.__validate_response__(r)
 
             with open(os.path.join(self.write_directory(name), "api.json"), 'w') as f:
@@ -92,7 +92,7 @@ class Gravitee:
 
         def __subscriptions__():
             # Export Subscriptions
-            r = requests.get(self.ENDPOINTS['export_subscriptions'].format(api_id), auth=self.authentication)
+            r = requests.get(self.ENDPOINTS['export_subscriptions'].format(api_id), auth=self.authentication, verify=False)
             Gravitee.__validate_response__(r)
             data = r.json()
             with open(os.path.join(self.write_directory(name), "subscriptions.json"), 'w') as f:
@@ -104,7 +104,7 @@ class Gravitee:
             # Export applications
             data = []
             for app in applications:
-                r = requests.get(self.ENDPOINTS['export_applications'].format(app), auth=self.authentication)
+                r = requests.get(self.ENDPOINTS['export_applications'].format(app), auth=self.authentication, verify=False)
                 Gravitee.__validate_response__(r)
 
                 to_remove = ('id', 'status', 'created_at', 'updated_at', 'owner')
@@ -126,7 +126,7 @@ class Gravitee:
         def __api__():
             with open(os.path.join(reading_directory, 'api.json'), 'r') as f:
                 data = json.load(f)
-            r = requests.post(self.ENDPOINTS['import_api'], auth=self.authentication, json=data)
+            r = requests.post(self.ENDPOINTS['import_api'], auth=self.authentication, json=data, verify=False)
             Gravitee.__validate_response__(r)
 
             return r.json()['id']
@@ -136,7 +136,7 @@ class Gravitee:
                 data = json.load(f)
 
             for app in data:
-                r = requests.post(self.ENDPOINTS['import_applications'], auth=self.authentication, json=app)
+                r = requests.post(self.ENDPOINTS['import_applications'], auth=self.authentication, json=app, verify=False)
                 Gravitee.__validate_response__(r)
 
         def __subscriptions__():
@@ -150,14 +150,14 @@ class Gravitee:
                 }
 
                 r = requests.post(self.ENDPOINTS['import_subscriptions'].format(api_id), auth=self.authentication,
-                                  params=payload)
+                                  params=payload, verify=False)
                 Gravitee.__validate_response__(r)
 
         def __start_api__():
-            r = requests.post(self.ENDPOINTS['apis_deploy'].format(api_id), auth=self.authentication)
+            r = requests.post(self.ENDPOINTS['apis_deploy'].format(api_id), auth=self.authentication, verify=False)
             Gravitee.__validate_response__(r)
             r = requests.post(self.ENDPOINTS['apis_lifecycle'].format(api_id), auth=self.authentication,
-                              params={'action': 'START'})
+                              params={'action': 'START'}, verify=False)
             Gravitee.__validate_response__(r)
 
         reading_directory = self.write_directory(name)
@@ -168,7 +168,7 @@ class Gravitee:
 
     def get_plan_by_name(self, api, name):
         r = requests.get(self.ENDPOINTS['plans'].format(api), auth=self.authentication,
-                         params={'name': name})
+                         params={'name': name}, verify=False)
         Gravitee.__validate_response__(r)
 
         for plan in r.json():
@@ -176,7 +176,7 @@ class Gravitee:
                 return plan['id']
 
     def get_app_by_name(self, name):
-        r = requests.get(self.ENDPOINTS['import_applications'], auth=self.authentication)
+        r = requests.get(self.ENDPOINTS['import_applications'], auth=self.authentication, verify=False)
         Gravitee.__validate_response__(r)
         for app in r.json():
             if app['name'] == name['name']:

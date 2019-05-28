@@ -76,60 +76,16 @@
                 "enabled": true
             }
         ],
-        "/sdn_wifi_access_point/:sdn_wifi_access_point_id": [
-            {
-                "methods": [
-                    "GET"
-                ],
-                "groovy": {
-                    "onResponseContentScript": ""
-                },
-                "description": "Description of the Groovy Gravitee Policy",
-                "enabled": true
-            }
-        ],
-        "/sdn_wifi_access_point": [
-            {
-                "methods": [
-                    "GET"
-                ],
-                "groovy": {
-                    "onResponseContentScript": "import groovy.json.JsonOutput\nimport groovy.json.JsonSlurper\n\ndef jsonSlurper = new JsonSlurper()\n\ndef content = jsonSlurper.parseText(response.content)\n\ncontent.each {\n    it.remove('user_id')\n  it.remove('dev_id')\n   def temp = it.sdn_wifi_access_point_data\n  temp.remove(\"username\")\n  temp.remove(\"password\")\n}\n\nreturn JsonOutput.toJson(content)"
-                },
-                "description": "Description of the Groovy Gravitee Policy",
-                "enabled": true
-            },
-            {
-                "methods": [
-                    "POST"
-                ],
-                "groovy": {
-                    "onResponseScript": "",
-                    "onRequestContentScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport io.gravitee.policy.api.PolicyChain;\nimport groovy.json.JsonSlurper\nimport groovy.json.JsonOutput\n\ndef jsonSlurper = new JsonSlurper();\n\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef username = auth_content.tenant_label;\ndef user_id = auth_content.os_id;\n\ndef user_roles = auth_content.realm_access.roles\n\n// Only admins can create computes\nif(!user_roles.contains('Administrator')){\n\tresult.state = State.FAILURE;\n    \tresult.code = 403;\n}\n\ndef request_content = jsonSlurper.parseText(request.content);\nif (!request_content){\n\tprintln \"Invalid request\";\n\tresult.state = State.FAILURE;\n    \tresult.code = 400;\n}\n\n// Add physical network data\nif(!request_content.containsKey(\"sdn_wifi_access_point_data\")){\n  request_content.sdn_wifi_access_point_data = [:]\n}\n\nrequest_content.sdn_wifi_access_point_data.auth_url = \"http://192.168.111.195/identity/v3\";\nrequest_content.sdn_wifi_access_point_data.domain_name = \"default\";\nrequest_content.sdn_wifi_access_point_data.password = \"adminpass\";\nrequest_content.sdn_wifi_access_point_data.project_name = \"admin\";\nrequest_content.sdn_wifi_access_point_data.username = \"admin\";\nrequest_content.sdn_wifi_access_point_data.odl_url = \"http://odl:8000\"\n\n// Add user information\nrequest_content.user_id = user_id;\n//request_content.name = username;\n\nreturn JsonOutput.toJson(request_content);"
-                },
-                "description": "Description of the Groovy Gravitee Policy",
-                "enabled": true
-            }
-        ],
+        "/sdn_wifi_access_point/:sdn_wifi_access_point_id": [],
+        "/sdn_wifi_access_point": [],
         "/physical_network/:physical_network_id": [],
         "/physical_network": [
             {
                 "methods": [
-                    "POST"
-                ],
-                "groovy": {
-                    "onRequestScript": "",
-                    "onRequestContentScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport io.gravitee.policy.api.PolicyChain;\nimport groovy.json.JsonSlurper\nimport groovy.json.JsonOutput\n\ndef jsonSlurper = new JsonSlurper();\n\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef username = auth_content.tenant_label;\ndef user_id = auth_content.os_id;\n\ndef user_roles = auth_content.realm_access.roles\n\n// Only admins can create computes\nif(!user_roles.contains('Administrator')){\n\tresult.state = State.FAILURE;\n    \tresult.code = 403;\n}\n\ndef request_content = jsonSlurper.parseText(request.content);\nif (!request_content){\n\tprintln \"Invalid request\";\n\tresult.state = State.FAILURE;\n    \tresult.code = 400;\n}\n\n// Add physical network data\nif(!request_content.containsKey(\"physical_network_data\")){\n  request_content.physical_network_data = [:]\n}\n\nrequest_content.physical_network_data.auth_url = \"http://192.168.111.195/identity/v3\";\nrequest_content.physical_network_data.domain_name = \"default\";\nrequest_content.physical_network_data.password = \"adminpass\";\nrequest_content.physical_network_data.project_name = \"admin\";\nrequest_content.physical_network_data.username = \"admin\";\n\n// Add user information\nrequest_content.user_id = user_id;\n//request_content.name = username;\n\nreturn JsonOutput.toJson(request_content);"
-                },
-                "description": "Description of the Groovy Gravitee Policy",
-                "enabled": true
-            },
-            {
-                "methods": [
                     "GET"
                 ],
                 "groovy": {
-                    "onResponseContentScript": "import groovy.json.JsonOutput\nimport groovy.json.JsonSlurper\n\ndef jsonSlurper = new JsonSlurper()\n\ndef content = jsonSlurper.parseText(response.content)\n\ncontent.each {\n    it.remove('user_id')\n  def temp = it.physical_network_data\n  temp.remove(\"auth_url\")\n  temp.remove(\"domain_name\")\n  temp.remove(\"password\")\n  temp.remove(\"project_name\")\n  temp.remove(\"username\")\n  \n}\n\nreturn JsonOutput.toJson(content)",
+                    "onResponseContentScript": "import groovy.json.JsonOutput\nimport groovy.json.JsonSlurper\n\ndef jsonSlurper = new JsonSlurper()\n\ndef content = jsonSlurper.parseText(response.content)\n\ncontent.each {\n    it.remove('physical_network_data')\n    it.remove('user_id')\n}\n\nreturn JsonOutput.toJson(content)",
                     "onRequestScript": ""
                 },
                 "description": "Description of the Groovy Gravitee Policy",
@@ -240,7 +196,7 @@
                     "POST"
                 ],
                 "groovy": {
-                    "onRequestContentScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport io.gravitee.policy.api.PolicyChain;\nimport groovy.json.JsonSlurper\nimport groovy.json.JsonOutput\n\ndef jsonSlurper = new JsonSlurper();\n\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef username = auth_content.tenant_label;\ndef user_id = auth_content.os_id;\n\ndef user_roles = auth_content.realm_access.roles\n\n// Only admins can create computes\nif(!user_roles.contains('Administrator')){\n\tresult.state = State.FAILURE;\n    \tresult.code = 403;\n}\n\ndef request_content = jsonSlurper.parseText(request.content);\nif (!request_content){\n\tprintln \"Invalid request\";\n\tresult.state = State.FAILURE;\n    \tresult.code = 400;\n}\n\n// Add compute data\nif(!request_content.containsKey(\"compute_data\")){\n  request_content.compute_data = [:]\n}\n\nrequest_content.compute_data.auth_url = \"http://192.168.111.195/identity/v3\";\nrequest_content.compute_data.domain_name = \"default\";\nrequest_content.compute_data.password = \"adminpass\";\nrequest_content.compute_data.project_name = \"admin\";\nrequest_content.compute_data.username = \"admin\";\n\n// Add user information\nrequest_content.user_id = user_id;\n//request_content.name = username;\n\nreturn JsonOutput.toJson(request_content);"
+                    "onRequestContentScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport io.gravitee.policy.api.PolicyChain;\nimport groovy.json.JsonSlurper\nimport groovy.json.JsonOutput\n\ndef jsonSlurper = new JsonSlurper();\n\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef username = auth_content.tenant;\ndef user_id = auth_content.os_id;\n\ndef user_roles = auth_content.realm_access.roles\n\n// Only admins can create computes\nif(!user_roles.contains('Administrator')){\n\tresult.state = State.FAILURE;\n    \tresult.code = 403;\n}\n\ndef request_content = jsonSlurper.parseText(request.content);\nif (!request_content){\n\tprintln \"Invalid request\";\n\tresult.state = State.FAILURE;\n    \tresult.code = 400;\n}\n\n// Add compute data\nrequest_content.compute_data = [:]\nrequest_content.compute_data.auth_url = \"http://192.168.111.195/identity/v3\";\nrequest_content.compute_data.domain_name = \"default\";\nrequest_content.compute_data.password = \"adminpass\";\nrequest_content.compute_data.project_name = \"admin\";\nrequest_content.compute_data.username = \"admin\";\n\n// Add user information\nrequest_content.user_id = user_id;\nrequest_content.name = username;\n\nreturn JsonOutput.toJson(request_content);"
                 },
                 "description": "Description of the Groovy Gravitee Policy",
                 "enabled": true
@@ -250,7 +206,7 @@
                     "GET"
                 ],
                 "groovy": {
-                    "onResponseContentScript": "import groovy.json.JsonOutput\nimport groovy.json.JsonSlurper\n\ndef jsonSlurper = new JsonSlurper()\n\ndef content = jsonSlurper.parseText(response.content)\n\ncontent.each {\n    it.remove('user_id')\n  def temp = it.compute_data\n  temp.remove(\"auth_url\")\n  temp.remove(\"password\")\n  temp.remove(\"username\")\n  temp.remove(\"project_name\")\n  temp.remove(\"domain_name\")\n  \n\n}\nreturn JsonOutput.toJson(content)"
+                    "onResponseContentScript": "import groovy.json.JsonOutput\nimport groovy.json.JsonSlurper\n\ndef jsonSlurper = new JsonSlurper()\n\ndef content = jsonSlurper.parseText(response.content)\n\ncontent.each {\n    it.remove('compute_data')\n    it.remove('user_id')\n}\n\nreturn JsonOutput.toJson(content)"
                 },
                 "description": "Description of the Groovy Gravitee Policy",
                 "enabled": true
@@ -293,7 +249,7 @@
     "pages": [],
     "plans": [
         {
-            "id": "65b974dc-93b7-4d12-b974-dc93b72d12cf",
+            "id": "eaca87db-736d-48df-8a87-db736d48dfd1",
             "name": "Oauth2",
             "description": "Plan using Oauth2",
             "validation": "MANUAL",
@@ -302,12 +258,12 @@
             "type": "API",
             "status": "PUBLISHED",
             "apis": [
-                "7df905c6-13bb-4762-b905-c613bbf76222"
+                "44727520-ac3d-41b7-b275-20ac3d01b740"
             ],
             "order": 0,
             "characteristics": [],
-            "created_at": 1554212874219,
-            "updated_at": 1554212874219,
+            "created_at": 1550233722619,
+            "updated_at": 1550233722619,
             "paths": {
                 "/": []
             },
@@ -363,13 +319,18 @@
                             "followRedirects": false
                         },
                         "ssl": {
-                            "trustAll": true,
+                            "trustAll": false,
                             "hostnameVerifier": false
                         }
                     }
                 ],
                 "load_balancing": {
                     "type": "ROUND_ROBIN"
+                },
+                "services": {
+                    "discovery": {
+                        "enabled": false
+                    }
                 }
             }
         ],

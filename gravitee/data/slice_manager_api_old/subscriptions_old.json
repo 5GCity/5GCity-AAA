@@ -1,0 +1,36 @@
+{
+    "data": [
+        {
+            "id": "8fd45e96-3bbb-43c7-945e-963bbbc3c729",
+            "api": "44727520-ac3d-41b7-b275-20ac3d01b740",
+            "plan": "eaca87db-736d-48df-8a87-db736d48dfd1",
+            "application": "b3b6ed15-abfa-494b-b6ed-15abfae94b9f",
+            "status": "accepted",
+            "processed_at": 1550233724113,
+            "processed_by": "c197d698-80db-45d7-97d6-9880db75d7fc",
+            "subscribed_by": "c197d698-80db-45d7-97d6-9880db75d7fc",
+            "starting_at": 1550233724096,
+            "created_at": 1550233723943,
+            "updated_at": 1550233723943,
+            "client_id": "my_client"
+        }
+    ],
+    "metadata": {
+        "b3b6ed15-abfa-494b-b6ed-15abfae94b9f": {
+            "name": "SliceManager Client"
+        },
+        "44727520-ac3d-41b7-b275-20ac3d01b740": {
+            "name": "Slice Manager API"
+        },
+        "eaca87db-736d-48df-8a87-db736d48dfd1": {
+            "name": "Oauth2"
+        }
+    },
+    "page": {
+        "current": 1,
+        "size": 1,
+        "per_page": 20,
+        "total_pages": 1,
+        "total_elements": 1
+    }
+}
