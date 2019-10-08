@@ -1,8 +1,12 @@
+import os
 import sys
-from abc import ABCMeta, abstractclassmethod
+from abc import ABCMeta
+
+import aaa_compose
 
 
 class Command(ABCMeta):
+    COMPOSE_DIR = os.path.dirname(aaa_compose.__file__)
 
     @classmethod
     def build_parser(mcs, parser):

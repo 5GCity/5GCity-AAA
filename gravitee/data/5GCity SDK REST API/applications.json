@@ -1,0 +1,9 @@
+[
+    {
+        "name": "5GCity Client",
+        "description": "Client for SliceManager API",
+        "type": "REST API",
+        "groups": [],
+        "clientId": "my_client"
+    }
+]

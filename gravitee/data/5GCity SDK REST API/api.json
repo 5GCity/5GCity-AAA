@@ -1,0 +1,535 @@
+{
+    "name": "5GCity SDK REST API",
+    "version": "0.8",
+    "description": "REST API for the 5GCity's SDK",
+    "visibility": "PUBLIC",
+    "paths": {
+        "/sdk/sliceManagement/slices/:sliceId/users/:userName": [
+            {
+                "methods": [
+                    "PUT"
+                ],
+                "groovy": {
+                    "onRequestContentScript": "",
+                    "onRequestScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport io.gravitee.policy.api.PolicyChain;\nimport groovy.json.JsonSlurper\nimport groovy.json.JsonOutput\n\ndef jsonSlurper = new JsonSlurper();\n\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef user_roles = auth_content.realm_access.roles\n\n// Only admins add or remove users\nif(!user_roles.contains('Administrator')){\n\tresult.state = State.FAILURE;\n    \tresult.code = 403;\n  return\n}\n\n// Validate provided username on path\nusername = request.path.split(\"/\").last()\n\n// Get admin access token\nauthToken = request.headers.get(\"Authorization\").first()\n\n// Request user list\ndef reqURL = \"@DASH_IP@/auth/admin/realms/5gcity/users?username=\" + username\n\ndef jsonSlurper2 = new JsonSlurper()\nusers = jsonSlurper2.parseText(reqURL.toURL().getText(requestProperties: [Authorization: authToken ]))\n\n// Check if users exist\n// validate username value \ndef exist = false\nusers.each { if(it.username == username) exist = true }\n\nif(!exist){\n  result.state = State.FAILURE;\n  result.code = 404;\n  return\n}"
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            },
+            {
+                "methods": [
+                    "DELETE"
+                ],
+                "groovy": {
+                    "onRequestContentScript": "",
+                    "onRequestScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport io.gravitee.policy.api.PolicyChain;\nimport groovy.json.JsonSlurper\nimport groovy.json.JsonOutput\n\ndef jsonSlurper = new JsonSlurper();\n\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef user_roles = auth_content.realm_access.roles\n\n// Only admins remove users\nif(!user_roles.contains('Administrator')){\n\tresult.state = State.FAILURE;\n    \tresult.code = 403;\n  return\n}\n\n// Dont validate username on delete because user can be removed elsewhere"
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            }
+        ],
+        "/sdk/sliceManagement/slices/:sliceId": [
+            {
+                "methods": [
+                    "DELETE",
+                    "PUT"
+                ],
+                "groovy": {
+                    "onRequestScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport io.gravitee.policy.api.PolicyChain;\nimport groovy.json.JsonSlurper\nimport groovy.json.JsonOutput\n\ndef jsonSlurper = new JsonSlurper();\n\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\n\ndef user_id = auth_content.os_id;\ndef user_roles = auth_content.realm_access.roles\n\n// Only admins can create computes\nif(!user_roles.contains('Administrator')){\n\tresult.state = State.FAILURE;\n    \tresult.code = 403;\n  return\n}"
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            }
+        ],
+        "/sdk/sliceManagement/slices": [
+            {
+                "methods": [
+                    "GET"
+                ],
+                "groovy": {
+                    "onResponseContentScript": "import groovy.json.JsonOutput\nimport groovy.json.JsonSlurper\n\n// Convert response to Map\ndef jsonSlurper = new JsonSlurper()\ndef content = jsonSlurper.parseText(response.content)\n\n// Get User access level\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef userLevel = auth_content.accessLevel\ndef username = auth_content.username\ndef user_roles = auth_content.realm_access.roles\n// Admin users are allowed to do everything\nif(user_roles.contains('Administrator')){\n  return JsonOutput.toJson(content)\n} \n\n// Check ownership and visibility\nnewContent = []\ncontent.each{\n  if(it.users.contains(username)){\n    newContent.add(it);\n  }\n}\n\nreturn JsonOutput.toJson(newContent)"
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            },
+            {
+                "methods": [
+                    "DELETE",
+                    "PATCH",
+                    "PUT"
+                ],
+                "groovy": {
+                    "onRequestScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport io.gravitee.policy.api.PolicyChain;\nimport groovy.json.JsonSlurper\nimport groovy.json.JsonOutput\n\ndef jsonSlurper = new JsonSlurper();\n\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef user_roles = auth_content.realm_access.roles\n\n// Only admins can manage slices\nif(!user_roles.contains('Administrator')){\n\tresult.state = State.FAILURE;\n    result.code = 403;\n}\n"
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            },
+            {
+                "methods": [
+                    "POST"
+                ],
+                "groovy": {
+                    "onRequestContentScript": "// Script to add the admin username directly to the slice\n\nimport io.gravitee.policy.groovy.PolicyResult.State\nimport io.gravitee.policy.api.PolicyChain;\nimport groovy.json.JsonSlurper\nimport groovy.json.JsonOutput\n\ndef jsonSlurper = new JsonSlurper();\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef username = auth_content.username;\ndef user_roles = auth_content.realm_access.roles\n\n// Only admins can create slices\nif(!user_roles.contains('Administrator')){\n  result.state = State.FAILURE;\n  result.code = 403;\n  return;\n}\n\n// Get request data\njsonSlurper = new JsonSlurper();\ndef request_content = jsonSlurper.parseText(request.content);\nif (!request_content){\n\tprintln \"Invalid request\";\n\tresult.state = State.FAILURE;\n    \tresult.code = 400;\n}\n\n// Add admin user\nrequest_content.users = []\n\nreturn JsonOutput.toJson(request_content);"
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            }
+        ],
+        "/sdk/services/service/:serviceId/publish": [
+            {
+                "methods": [
+                    "POST"
+                ],
+                "groovy": {
+                    "onRequestScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport groovy.json.JsonSlurper\n\n// Get function id\nserviceId = request.uri.split(\"/\")[-2]\n// Get User access level\ndef jsonSlurper = new JsonSlurper();\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef userLevel = auth_content.accessLevel\ndef username = auth_content.username\ndef user_roles = auth_content.realm_access.roles\n// Admin users are allowed to do everything\nif(user_roles.contains('Administrator')){\n  return\n} \n\n// Get function to evaluate Authorization conditions\n// Query Service ID\ndef reqURL = \"@SDK_IP_PORT@/sdk/services/\" + serviceId\nURLConnection connection = reqURL.toURL().openConnection();\nStringBuffer serviceResp = new StringBuffer();\n\nif(connection.responseCode == 404){\n  \tresult.state = State.FAILURE\n    result.code = 404\n  return\n} else {\n  BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));\n  \n  String inputLine;\n  while ((inputLine = reader.readLine()) != null)\n  {\n      serviceResp.append(inputLine)\n  }\n  reader.close();\n}\n\n// Parse users in slice\ndef jsonSlurper2 = new JsonSlurper()\ns = jsonSlurper2.parseText(serviceResp.toString())\n\n// Validate Ownership and visibility\nif(username != s.ownerId && s.visibility == \"PRIVATE\"){\n  result.state = State.FAILURE\n  result.code = 403\n  return \n}\n\n// Validate Access Level\nif(username != s.ownerId && userLevel > s.accessLevel){\n  result.state = State.FAILURE\n  result.code = 403\n  return \n}\n\n// Query Slice\nreqURL = \"@SDK_IP_PORT@/sdk/sliceManagement/slices/\" + s.sliceId\nconnection = reqURL.toURL().openConnection();\nStringBuffer sliceResp = new StringBuffer();\nif(connection.responseCode == 404){\n  \tresult.state = State.FAILURE\n    result.code = 404\n  return\n} else {\n  BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));\n  \n  String inputLine;\n  while ((inputLine = reader.readLine()) != null)\n  {\n      sliceResp.append(inputLine)\n  }\n  reader.close();\n}\n\n// Parse users in slice\ndef jsonSlurper3 = new JsonSlurper()\nslice = jsonSlurper3.parseText(sliceResp.toString())\n\n// Check if user in slice\nif(!slice[\"users\"].contains(username)){\n    result.state = State.FAILURE\n    result.code = 403\n    return\n}"
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            }
+        ],
+        "/sdk/services/:serviceId/monitoring_params/:monitoringParameterId": [
+            {
+                "methods": [
+                    "DELETE"
+                ],
+                "groovy": {
+                    "onRequestScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport groovy.json.JsonSlurper\n\n// Get function id\nserviceId = request.uri.split(\"/\")[-3]\n// Get User access level\ndef jsonSlurper = new JsonSlurper();\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef userLevel = auth_content.accessLevel\ndef username = auth_content.username\ndef user_roles = auth_content.realm_access.roles\n// Admin users are allowed to do everything\nif(user_roles.contains('Administrator')){\n  return\n} \n\n// Get function to evaluate Authorization conditions\n// Query Service ID\ndef reqURL = \"@SDK_IP_PORT@/sdk/services/\" + serviceId\nURLConnection connection = reqURL.toURL().openConnection();\nStringBuffer serviceResp = new StringBuffer();\n\nif(connection.responseCode == 404){\n  \tresult.state = State.FAILURE\n    result.code = 404\n  return\n} else {\n  BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));\n  \n  String inputLine;\n  while ((inputLine = reader.readLine()) != null)\n  {\n      serviceResp.append(inputLine)\n  }\n  reader.close();\n}\n\n// Parse users in slice\ndef jsonSlurper2 = new JsonSlurper()\ns = jsonSlurper2.parseText(serviceResp.toString())\n\n// Validate Ownership and visibility\nif(username != s.ownerId){\n  result.state = State.FAILURE\n  result.code = 403\n  return \n}"
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            }
+        ],
+        "/sdk/services/:serviceId/monitoring_params": [
+            {
+                "methods": [
+                    "GET"
+                ],
+                "groovy": {
+                    "onRequestScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport groovy.json.JsonSlurper\n\n// Get function id\nserviceId = request.uri.split(\"/\")[-2]\n// Get User access level\ndef jsonSlurper = new JsonSlurper();\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef userLevel = auth_content.accessLevel\ndef username = auth_content.username\ndef user_roles = auth_content.realm_access.roles\n// Admin users are allowed to do everything\nif(user_roles.contains('Administrator')){\n  return\n} \n\n// Get function to evaluate Authorization conditions\n// Query Service ID\ndef reqURL = \"@SDK_IP_PORT@/sdk/services/\" + serviceId\nURLConnection connection = reqURL.toURL().openConnection();\nStringBuffer serviceResp = new StringBuffer();\n\nif(connection.responseCode == 404){\n  \tresult.state = State.FAILURE\n    result.code = 404\n  return\n} else {\n  BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));\n  \n  String inputLine;\n  while ((inputLine = reader.readLine()) != null)\n  {\n      serviceResp.append(inputLine)\n  }\n  reader.close();\n}\n\n// Parse users in slice\ndef jsonSlurper2 = new JsonSlurper()\nf = jsonSlurper2.parseText(serviceResp.toString())\n\n// Validate Ownership and visibility\nif(username != f.ownerId && f.visibility == \"PRIVATE\"){\n  result.state = State.FAILURE\n  result.code = 403\n  return \n}\n\n// Validate Access Level\nif(username != f.ownerId && userLevel > f.accessLevel){\n  result.state = State.FAILURE\n  result.code = 403\n  return \n}\n\n// Query Slice\nreqURL = \"@SDK_IP_PORT@/sdk/sliceManagement/slices/\" + f.sliceId\nconnection = reqURL.toURL().openConnection();\nStringBuffer sliceResp = new StringBuffer();\nif(connection.responseCode == 404){\n  \tresult.state = State.FAILURE\n    result.code = 404\n  return\n} else {\n  BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));\n  \n  String inputLine;\n  while ((inputLine = reader.readLine()) != null)\n  {\n      sliceResp.append(inputLine)\n  }\n  reader.close();\n}\n\n// Parse users in slice\ndef jsonSlurper3 = new JsonSlurper()\nslice = jsonSlurper3.parseText(sliceResp.toString())\n\n// Check if user in slice\nif(!slice[\"users\"].contains(username)){\n    result.state = State.FAILURE\n    result.code = 403\n    return\n}"
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            },
+            {
+                "methods": [
+                    "PUT"
+                ],
+                "groovy": {
+                    "onRequestScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport groovy.json.JsonSlurper\n\n// Get function id\nserviceId = request.uri.split(\"/\")[-2]\n// Get User access level\ndef jsonSlurper = new JsonSlurper();\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef userLevel = auth_content.accessLevel\ndef username = auth_content.username\ndef user_roles = auth_content.realm_access.roles\n// Admin users are allowed to do everything\nif(user_roles.contains('Administrator')){\n  return\n} \n\n// Get function to evaluate Authorization conditions\n// Query Service ID\ndef reqURL = \"@SDK_IP_PORT@/sdk/services/\" + serviceId\nURLConnection connection = reqURL.toURL().openConnection();\nStringBuffer serviceResp = new StringBuffer();\n\nif(connection.responseCode == 404){\n  \tresult.state = State.FAILURE\n    result.code = 404\n  return\n} else {\n  BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));\n  \n  String inputLine;\n  while ((inputLine = reader.readLine()) != null)\n  {\n      serviceResp.append(inputLine)\n  }\n  reader.close();\n}\n\n// Parse users in slice\ndef jsonSlurper2 = new JsonSlurper()\ns = jsonSlurper2.parseText(serviceResp.toString())\n\n// Validate Ownership and visibility\nif(username != s.ownerId){\n  result.state = State.FAILURE\n  result.code = 403\n  return \n}"
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            }
+        ],
+        "/sdk/services/:serviceId/create_descriptor": [
+            {
+                "methods": [
+                    "POST"
+                ],
+                "groovy": {
+                    "onRequestScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport groovy.json.JsonSlurper\n\n// Get function id\nserviceId = request.uri.split(\"/\")[-2]\n// Get User access level\ndef jsonSlurper = new JsonSlurper();\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef userLevel = auth_content.accessLevel\ndef username = auth_content.username\ndef user_roles = auth_content.realm_access.roles\n// Admin users are allowed to do everything\nif(user_roles.contains('Administrator')){\n  return\n} \n\n// Get function to evaluate Authorization conditions\n// Query Service ID\ndef reqURL = \"@SDK_IP_PORT@/sdk/services/\" + serviceId\nURLConnection connection = reqURL.toURL().openConnection();\nStringBuffer serviceResp = new StringBuffer();\n\nif(connection.responseCode == 404){\n  \tresult.state = State.FAILURE\n    result.code = 404\n  return\n} else {\n  BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));\n  \n  String inputLine;\n  while ((inputLine = reader.readLine()) != null)\n  {\n      serviceResp.append(inputLine)\n  }\n  reader.close();\n}\n\n// Parse users in slice\ndef jsonSlurper2 = new JsonSlurper()\ns = jsonSlurper2.parseText(serviceResp.toString())\n\n// Validate Ownership and visibility\nif(username != s.ownerId && s.visibility == \"PRIVATE\"){\n  result.state = State.FAILURE\n  result.code = 403\n  return \n}\n\n// Validate Access Level\nif(username != s.ownerId && userLevel > s.accessLevel){\n  result.state = State.FAILURE\n  result.code = 403\n  return \n}\n\n// Query Slice\nreqURL = \"@SDK_IP_PORT@/sdk/sliceManagement/slices/\" + s.sliceId\nconnection = reqURL.toURL().openConnection();\nStringBuffer sliceResp = new StringBuffer();\nif(connection.responseCode == 404){\n  \tresult.state = State.FAILURE\n    result.code = 404\n  return\n} else {\n  BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));\n  \n  String inputLine;\n  while ((inputLine = reader.readLine()) != null)\n  {\n      sliceResp.append(inputLine)\n  }\n  reader.close();\n}\n\n// Parse users in slice\ndef jsonSlurper3 = new JsonSlurper()\nslice = jsonSlurper3.parseText(sliceResp.toString())\n\n// Check if user in slice\nif(!slice[\"users\"].contains(username)){\n    result.state = State.FAILURE\n    result.code = 403\n    return\n}"
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            }
+        ],
+        "/sdk/services/:serviceId": [
+            {
+                "methods": [
+                    "GET"
+                ],
+                "groovy": {
+                    "onRequestScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport groovy.json.JsonSlurper\n\n// Get function id\nserviceId = request.uri.split(\"/\").last()\n// Get User access level\ndef jsonSlurper = new JsonSlurper();\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef userLevel = auth_content.accessLevel\ndef username = auth_content.username\ndef user_roles = auth_content.realm_access.roles\n// Admin users are allowed to do everything\nif(user_roles.contains('Administrator')){\n  return\n} \n\n// Get function to evaluate Authorization conditions\n// Query Service ID\ndef reqURL = \"@SDK_IP_PORT@/sdk/services/\" + serviceId\nURLConnection connection = reqURL.toURL().openConnection();\nStringBuffer serviceResp = new StringBuffer();\n\nif(connection.responseCode == 404){\n  \tresult.state = State.FAILURE\n    result.code = 404\n  return\n} else {\n  BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));\n  \n  String inputLine;\n  while ((inputLine = reader.readLine()) != null)\n  {\n      serviceResp.append(inputLine)\n  }\n  reader.close();\n}\n\n// Parse users in slice\ndef jsonSlurper2 = new JsonSlurper()\ns = jsonSlurper2.parseText(serviceResp.toString())\n\n// Validate Ownership and visibility\nif(username != s.ownerId && s.visibility == \"PRIVATE\"){\n  result.state = State.FAILURE\n  result.code = 403\n  return \n}\n\n// Validate Access Level\nif(username != s.ownerId && userLevel > s.accessLevel){\n  result.state = State.FAILURE\n  result.code = 403\n  return \n}\n\n// Query Slice\nreqURL = \"@SDK_IP_PORT@/sdk/sliceManagement/slices/\" + s.sliceId\nconnection = reqURL.toURL().openConnection();\nStringBuffer sliceResp = new StringBuffer();\nif(connection.responseCode == 404){\n  \tresult.state = State.FAILURE\n    result.code = 404\n  return\n} else {\n  BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));\n  \n  String inputLine;\n  while ((inputLine = reader.readLine()) != null)\n  {\n      sliceResp.append(inputLine)\n  }\n  reader.close();\n}\n\n// Parse users in slice\ndef jsonSlurper3 = new JsonSlurper()\nslice = jsonSlurper3.parseText(sliceResp.toString())\n\n// Check if user in slice\nif(!slice[\"users\"].contains(username)){\n    result.state = State.FAILURE\n    result.code = 403\n    return\n}"
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            },
+            {
+                "methods": [
+                    "DELETE"
+                ],
+                "groovy": {
+                    "onRequestScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport groovy.json.JsonSlurper\n\n// Get function id\nserviceId = request.uri.split(\"/\").last()\n// Get User access level\ndef jsonSlurper = new JsonSlurper();\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef userLevel = auth_content.accessLevel\ndef username = auth_content.username\ndef user_roles = auth_content.realm_access.roles\n// Admin users are allowed to do everything\nif(user_roles.contains('Administrator')){\n  return\n} \n\n// Get function to evaluate Authorization conditions\n// Query Service ID\ndef reqURL = \"@SDK_IP_PORT@/sdk/services/\" + serviceId\nURLConnection connection = reqURL.toURL().openConnection();\nStringBuffer serviceResp = new StringBuffer();\n\nif(connection.responseCode == 404){\n  \tresult.state = State.FAILURE\n    result.code = 404\n  return\n} else {\n  BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));\n  \n  String inputLine;\n  while ((inputLine = reader.readLine()) != null)\n  {\n      serviceResp.append(inputLine)\n  }\n  reader.close();\n}\n\n// Parse users in slice\ndef jsonSlurper2 = new JsonSlurper()\ns = jsonSlurper2.parseText(serviceResp.toString())\n\n// Validate Ownership and visibility\nif(username != s.ownerId){\n  result.state = State.FAILURE\n  result.code = 403\n  return \n}",
+                    "onRequestContentScript": ""
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            }
+        ],
+        "/sdk/services/": [
+            {
+                "methods": [
+                    "GET"
+                ],
+                "groovy": {
+                    "onResponseContentScript": "import groovy.json.JsonOutput\nimport groovy.json.JsonSlurper\n\n// Convert response to Map\ndef jsonSlurper = new JsonSlurper()\ndef content = jsonSlurper.parseText(response.content)\n\n// Get User access level\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef userLevel = auth_content.accessLevel\ndef username = auth_content.username\ndef user_roles = auth_content.realm_access.roles\n// Admin users are allowed to do everything\nif(user_roles.contains('Administrator')){\n  return JsonOutput.toJson(content)\n} \n\n// Check ownership and visibility\ncontent.removeAll {username != it.ownerId && it.visibility == \"PRIVATE\"}\ncontent.removeAll {username != it.ownerId && userLevel > it.accessLevel}\n\nreturn JsonOutput.toJson(content)",
+                    "onRequestScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport groovy.json.JsonSlurper\n\n// Check query parameter\ngoodReq = request.uri.contains(\"sliceId=\")\nif(!goodReq){\n  \tresult.state = State.FAILURE\n    result.code = 400\n    return\n}\n// Get SliceId\nparameters = request.uri.split(\"\\\\?\").last()\nparameters = parameters.split(\"&\")\n// Convert parameters to map\ndef map = parameters.collectEntries { param -> param.split('=').collect { URLDecoder.decode(it) }}\n\n// Query Slice ID\ndef reqURL = \"@SDK_IP_PORT@/sdk/sliceManagement/slices/\" + map[\"sliceId\"]\nURLConnection connection = reqURL.toURL().openConnection();\nStringBuffer response = new StringBuffer();\n\nif(connection.responseCode == 404){\n  \tresult.state = State.FAILURE\n    result.code = 404\n  return\n} else {\n  BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));\n  \n  String inputLine;\n  while ((inputLine = reader.readLine()) != null)\n  {\n      response.append(inputLine)\n  }\n  reader.close();\n}\n\n// Validate user admin role\ndef jsonSlurper = new JsonSlurper();\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef user_roles = auth_content.realm_access.roles\n// Admin users are allowed to do everything\nif(user_roles.contains('Administrator')){\n  return\n}\n\n// Parse users in slice\ndef jsonSlurper2 = new JsonSlurper()\nslice = jsonSlurper2.parseText(response.toString())\n\n// Check if user in slice\ndef username = auth_content.username\nif(!slice[\"users\"].contains(username)){\n    result.state = State.FAILURE\n    result.code = 403\n    return\n}"
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            },
+            {
+                "methods": [
+                    "POST"
+                ],
+                "groovy": {
+                    "onRequestScript": "",
+                    "onRequestContentScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport groovy.json.JsonSlurper\nimport groovy.json.JsonOutput\n\n// Get SliceId\ndef jsonSlurper = new JsonSlurper();\ndef reqContent = jsonSlurper.parseText(request.content);\nif (!reqContent || !reqContent.containsKey(\"sliceId\")){\n\tresult.state = State.FAILURE;\n    result.code = 400;\n}\nsliceId = reqContent[\"sliceId\"]\n\n// Query Slice ID\ndef reqURL = \"@SDK_IP_PORT@/sdk/sliceManagement/slices/\" + sliceId\nURLConnection connection = reqURL.toURL().openConnection();\nStringBuffer response = new StringBuffer();\n\nif(connection.responseCode == 404){\n  \tresult.state = State.FAILURE\n    result.code = 404\n  return\n} else {\n  BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));\n  \n  String inputLine;\n  while ((inputLine = reader.readLine()) != null)\n  {\n      response.append(inputLine)\n  }\n  reader.close();\n}\n\n// Validate user admin role\ndef jsonSlurper2 = new JsonSlurper();\ndef auth_content = jsonSlurper2.parseText(context.attributes['oauth.payload']);\ndef user_roles = auth_content.realm_access.roles\ndef username = auth_content.username\nreqContent.ownerId = username\n// Admin users are allowed to do everything\nif(user_roles.contains('Administrator')){\n  return JsonOutput.toJson(reqContent)\n}\n\n// Parse users in slice\ndef jsonSlurper3 = new JsonSlurper()\nslice = jsonSlurper3.parseText(response.toString())\n\n// Check if user in slice\nif(!slice[\"users\"].contains(username)){\n    result.state = State.FAILURE\n    result.code = 403\n    return\n}\n\n// Evaluate Functions\nif(!reqContent.containsKey(\"component\")){\n    result.state = State.FAILURE\n    result.code = 400\n    return\n}\n\n\n// Get auth token used\nauthToken = request.headers.get(\"Authorization\").first()\n\n// Check if user can reach function\nreqContent[\"component\"].each {\n  def reqURL2;\n  if(it.componentType == \"SDK_FUNCTION\"){\n    reqURL2 = \"@DASH_IP@/gw/sdkapi/sdk/functions/\" + it.componentId\n  } else if (it.componentType == \"SDK_FUNCTION\"){\n    reqURL2 = \"@DASH_IP@/gw/sdkapi/sdk/services/\" + it.componentId\n  }\n  URLConnection connectionF = reqURL2.toURL().openConnection();\n  connectionF.setRequestProperty (\"Authorization\", authToken);\n  if(connectionF.responseCode > 299){\n  \tresult.state = State.FAILURE\n    result.code = connectionF.responseCode\n    result.error = \"Error while evaluating  \" + it.componentType +  \" with id \" + it.componentId\n    return\n  } \n}\n\n\n// Verify if user is using only allowed functions\nreturn JsonOutput.toJson(reqContent)"
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            },
+            {
+                "methods": [
+                    "PUT"
+                ],
+                "groovy": {
+                    "onRequestScript": "",
+                    "onRequestContentScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport groovy.json.JsonSlurper\nimport groovy.json.JsonOutput\n\n// Get req info\ndef jsonSlurper = new JsonSlurper();\ndef reqContent = jsonSlurper.parseText(request.content);\nif (!reqContent || !reqContent.containsKey(\"sliceId\") || !reqContent.containsKey(\"ownerId\") || !reqContent.containsKey(\"id\")){\n\tresult.state = State.FAILURE;\n    result.code = 400;\n}\nsId = reqContent[\"id\"]\n\n// Validate user admin role\ndef jsonSlurper2 = new JsonSlurper();\ndef auth_content = jsonSlurper2.parseText(context.attributes['oauth.payload']);\ndef user_roles = auth_content.realm_access.roles\ndef username = auth_content.username\n// Admin users are allowed to do everything\nif(user_roles.contains('Administrator')){\n  return JsonOutput.toJson(reqContent);\n}\n\n// Query function to update\ndef reqURL = \"@SDK_IP_PORT@/sdk/services/\" + sId\nURLConnection connection = reqURL.toURL().openConnection();\nStringBuffer serviceResp = new StringBuffer();\n\nif(connection.responseCode == 404){\n  \tresult.state = State.FAILURE\n    result.code = 404\n    return\n} else {\n  BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));\n  \n  String inputLine;\n  while ((inputLine = reader.readLine()) != null)\n  {\n      serviceResp.append(inputLine)\n  }\n  reader.close();\n}\n\n// Check if reported owner is the function's owner\ndef jsonSlurper3 = new JsonSlurper()\ns = jsonSlurper3.parseText(serviceResp.toString())\n\nif(s[\"ownerId\"] != username){\n  \tresult.state = State.FAILURE;\n    result.code = 403;\n    return\n}\n\n// Evaluate Functions\nif(!reqContent.containsKey(\"component\")){\n    result.state = State.FAILURE\n    result.code = 400\n    return\n}\n\n// Get auth token used\nauthToken = request.headers.get(\"Authorization\").first()\n\n// Check if user can reach function\nreqContent[\"component\"].each {\n  def reqURL2;\n  if(it.componentType == \"SDK_FUNCTION\"){\n    reqURL2 = \"@DASH_IP@/gw/sdkapi/sdk/functions/\" + it.componentId\n  } else if (it.componentType == \"SDK_FUNCTION\"){\n    reqURL2 = \"@DASH_IP@/gw/sdkapi/sdk/services/\" + it.componentId\n  }\n  URLConnection connectionF = reqURL2.toURL().openConnection();\n  connectionF.setRequestProperty (\"Authorization\", authToken);\n  if(connectionF.responseCode > 299){\n  \tresult.state = State.FAILURE\n    result.code = connectionF.responseCode\n    result.error = \"Error while evaluating  \" + it.componentType +  \" with id \" + it.componentId\n    return\n  } \n}\n\nreturn JsonOutput.toJson(reqContent);"
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            }
+        ],
+        "/sdk/service_descriptor/:serviceDescriptorId/unpublish": [
+            {
+                "methods": [
+                    "POST"
+                ],
+                "groovy": {
+                    "onRequestScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport groovy.json.JsonSlurper\n\n// Get function id\ndescriptorId = request.uri.split(\"/\")[-2]\n// Get User access level\ndef jsonSlurper = new JsonSlurper();\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef userLevel = auth_content.accessLevel\ndef username = auth_content.username\ndef user_roles = auth_content.realm_access.roles\n// Admin users are allowed to do everything\nif(user_roles.contains('Administrator')){\n  return\n} \n\n// Get function to evaluate Authorization conditions\n// Query Service ID\ndef reqURL = \"@SDK_IP_PORT@/sdk/service_descriptor/\" + descriptorId\nURLConnection connection = reqURL.toURL().openConnection();\nStringBuffer desResp = new StringBuffer();\n\nif(connection.responseCode == 404){\n  \tresult.state = State.FAILURE\n    result.code = 404\n  return\n} else {\n  BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));\n  \n  String inputLine;\n  while ((inputLine = reader.readLine()) != null)\n  {\n      desResp.append(inputLine)\n  }\n  reader.close();\n}\n\ndef jsonSlurper2 = new JsonSlurper()\ndescriptor = jsonSlurper2.parseText(desResp.toString())\n\ndef authToken = request.headers.get(\"Authorization\").first()\ndef reqURL2 = \"@DASH_IP@/gw/sdkapi/sdk/services/\" + descriptor[\"serviceId\"]\nURLConnection connectionF = reqURL2.toURL().openConnection();\nconnectionF.setRequestProperty (\"Authorization\", authToken);\nif(connectionF.responseCode > 299){\n  \tresult.state = State.FAILURE\n    result.code = connectionF.responseCode\n} "
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            }
+        ],
+        "/sdk/service_descriptor/:serviceDescriptorId/publish": [
+            {
+                "methods": [
+                    "POST"
+                ],
+                "groovy": {
+                    "onRequestScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport groovy.json.JsonSlurper\n\n// Get function id\ndescriptorId = request.uri.split(\"/\")[-2]\n// Get User access level\ndef jsonSlurper = new JsonSlurper();\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef userLevel = auth_content.accessLevel\ndef username = auth_content.username\ndef user_roles = auth_content.realm_access.roles\n// Admin users are allowed to do everything\nif(user_roles.contains('Administrator')){\n  return\n} \n\n// Get function to evaluate Authorization conditions\n// Query Service ID\ndef reqURL = \"@SDK_IP_PORT@/sdk/service_descriptor/\" + descriptorId\nURLConnection connection = reqURL.toURL().openConnection();\nStringBuffer desResp = new StringBuffer();\n\nif(connection.responseCode == 404){\n  \tresult.state = State.FAILURE\n    result.code = 404\n  return\n} else {\n  BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));\n  \n  String inputLine;\n  while ((inputLine = reader.readLine()) != null)\n  {\n      desResp.append(inputLine)\n  }\n  reader.close();\n}\n\ndef jsonSlurper2 = new JsonSlurper()\ndescriptor = jsonSlurper2.parseText(desResp.toString())\n\ndef authToken = request.headers.get(\"Authorization\").first()\ndef reqURL2 = \"@DASH_IP@/gw/sdkapi/sdk/services/\" + descriptor[\"serviceId\"]\nURLConnection connectionF = reqURL2.toURL().openConnection();\nconnectionF.setRequestProperty (\"Authorization\", authToken);\nif(connectionF.responseCode > 299){\n  \tresult.state = State.FAILURE\n    result.code = connectionF.responseCode\n} "
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            }
+        ],
+        "/sdk/service_descriptor/:serviceDescriptorId/nsd": [
+            {
+                "methods": [
+                    "GET"
+                ],
+                "groovy": {
+                    "onRequestScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport groovy.json.JsonSlurper\n\n// Get function id\ndescriptorId = request.uri.split(\"/\")[-2]\n// Get User access level\ndef jsonSlurper = new JsonSlurper();\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef userLevel = auth_content.accessLevel\ndef username = auth_content.username\ndef user_roles = auth_content.realm_access.roles\n// Admin users are allowed to do everything\nif(user_roles.contains('Administrator')){\n  return\n} \n\n// Get function to evaluate Authorization conditions\n// Query Service ID\ndef reqURL = \"@SDK_IP_PORT@/sdk/service_descriptor/\" + descriptorId\nURLConnection connection = reqURL.toURL().openConnection();\nStringBuffer desResp = new StringBuffer();\n\nif(connection.responseCode == 404){\n  \tresult.state = State.FAILURE\n    result.code = 404\n  return\n} else {\n  BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));\n  \n  String inputLine;\n  while ((inputLine = reader.readLine()) != null)\n  {\n      desResp.append(inputLine)\n  }\n  reader.close();\n}\n\ndef jsonSlurper2 = new JsonSlurper()\ndescriptor = jsonSlurper2.parseText(desResp.toString())\n\ndef authToken = request.headers.get(\"Authorization\").first()\ndef reqURL2 = \"@DASH_IP@/gw/sdkapi/sdk/services/\" + descriptor[\"serviceId\"]\nURLConnection connectionF = reqURL2.toURL().openConnection();\nconnectionF.setRequestProperty (\"Authorization\", authToken);\nif(connectionF.responseCode > 299){\n  \tresult.state = State.FAILURE\n    result.code = connectionF.responseCode\n} "
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            }
+        ],
+        "/sdk/service_descriptor/:serviceDescriptorId": [
+            {
+                "methods": [
+                    "GET"
+                ],
+                "groovy": {
+                    "onRequestScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport groovy.json.JsonSlurper\n\n// Get function id\ndescriptorId = request.uri.split(\"/\").last()\n// Get User access level\ndef jsonSlurper = new JsonSlurper();\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef userLevel = auth_content.accessLevel\ndef username = auth_content.username\ndef user_roles = auth_content.realm_access.roles\n// Admin users are allowed to do everything\nif(user_roles.contains('Administrator')){\n  return\n} \n\n// Get function to evaluate Authorization conditions\n// Query Service ID\ndef reqURL = \"@SDK_IP_PORT@/sdk/service_descriptor/\" + descriptorId\nURLConnection connection = reqURL.toURL().openConnection();\nStringBuffer desResp = new StringBuffer();\n\nif(connection.responseCode == 404){\n  \tresult.state = State.FAILURE\n    result.code = 404\n  return\n} else {\n  BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));\n  \n  String inputLine;\n  while ((inputLine = reader.readLine()) != null)\n  {\n      desResp.append(inputLine)\n  }\n  reader.close();\n}\n\ndef jsonSlurper2 = new JsonSlurper()\ndescriptor = jsonSlurper2.parseText(desResp.toString())\n\ndef authToken = request.headers.get(\"Authorization\").first()\ndef reqURL2 = \"@DASH_IP@/gw/sdkapi/sdk/services/\" + descriptor[\"serviceId\"]\nURLConnection connectionF = reqURL2.toURL().openConnection();\nconnectionF.setRequestProperty (\"Authorization\", authToken);\nif(connectionF.responseCode > 299){\n  \tresult.state = State.FAILURE\n    result.code = connectionF.responseCode\n} ",
+                    "onResponseContentScript": ""
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            },
+            {
+                "methods": [
+                    "DELETE"
+                ],
+                "groovy": {
+                    "onRequestScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport groovy.json.JsonSlurper\n\n// Get function id\ndescriptorId = request.uri.split(\"/\").last()\n// Get User access level\ndef jsonSlurper = new JsonSlurper();\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef userLevel = auth_content.accessLevel\ndef username = auth_content.username\ndef user_roles = auth_content.realm_access.roles\n// Admin users are allowed to do everything\nif(user_roles.contains('Administrator')){\n  return\n} \n\n// Get function to evaluate Authorization conditions\n// Query Service ID\ndef reqURL = \"@SDK_IP_PORT@/sdk/service_descriptor/\" + descriptorId\nURLConnection connection = reqURL.toURL().openConnection();\nStringBuffer desResp = new StringBuffer();\n\nif(connection.responseCode == 404){\n  \tresult.state = State.FAILURE\n    result.code = 404\n  return\n} else {\n  BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));\n  \n  String inputLine;\n  while ((inputLine = reader.readLine()) != null)\n  {\n      desResp.append(inputLine)\n  }\n  reader.close();\n}\n\ndef jsonSlurper2 = new JsonSlurper()\ndescriptor = jsonSlurper2.parseText(desResp.toString())\n\ndef authToken = request.headers.get(\"Authorization\").first()\ndef reqURL2 = \"@DASH_IP@/gw/sdkapi/sdk/services/\" + descriptor[\"serviceId\"]\nURLConnection connectionF = reqURL2.toURL().openConnection();\nconnectionF.setRequestProperty (\"Authorization\", authToken);\nif(connectionF.responseCode > 299){\n  \tresult.state = State.FAILURE\n    result.code = connectionF.responseCode\n} else {\n   StringBuffer response = new StringBuffer();\n\n   BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));\n  \n  String inputLine;\n  while ((inputLine = reader.readLine()) != null)\n  {\n      response.append(inputLine)\n  }\n  reader.close();\n  \n  def jsonSlurper3 = new JsonSlurper()\n  def service = jsonSlurper3.parseText(response.toString())\n  \n  if (service[\"ownerId\"] != username){\n    \tresult.state = State.FAILURE\n       result.code = 403\n  }\n  \n}"
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            }
+        ],
+        "/sdk/service_descriptor/": [
+            {
+                "methods": [
+                    "GET"
+                ],
+                "groovy": {
+                    "onRequestScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport groovy.json.JsonSlurper\n\n// Check query parameter\ngoodReq = request.uri.contains(\"sliceId=\")\nif(!goodReq){\n  \tresult.state = State.FAILURE\n    result.code = 400\n    return\n}\n// Get SliceId\nparameters = request.uri.split(\"\\\\?\").last()\nparameters = parameters.split(\"&\")\n// Convert parameters to map\ndef map = parameters.collectEntries { param -> param.split('=').collect { URLDecoder.decode(it) }}\n\n// Query Slice ID\ndef reqURL = \"@SDK_IP_PORT@/sdk/sliceManagement/slices/\" + map[\"sliceId\"]\nURLConnection connection = reqURL.toURL().openConnection();\nStringBuffer response = new StringBuffer();\n\nif(connection.responseCode == 404){\n  \tresult.state = State.FAILURE\n    result.code = 404\n  return\n} else {\n  BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));\n  \n  String inputLine;\n  while ((inputLine = reader.readLine()) != null)\n  {\n      response.append(inputLine)\n  }\n  reader.close();\n}\n\n// Validate user admin role\ndef jsonSlurper = new JsonSlurper();\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef user_roles = auth_content.realm_access.roles\n// Admin users are allowed to do everything\nif(user_roles.contains('Administrator')){\n  return\n}\n\n// Parse users in slice\ndef jsonSlurper2 = new JsonSlurper()\nslice = jsonSlurper2.parseText(response.toString())\n\n// Check if user in slice\ndef username = auth_content.username\nif(!slice[\"users\"].contains(username)){\n    result.state = State.FAILURE\n    result.code = 403\n    return\n}",
+                    "onResponseContentScript": "import groovy.json.JsonOutput\nimport groovy.json.JsonSlurper\n\n// Convert response to Map\ndef jsonSlurper = new JsonSlurper()\ndef content = jsonSlurper.parseText(response.content)\n\n// Get User access level\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef userLevel = auth_content.accessLevel\ndef username = auth_content.username\ndef user_roles = auth_content.realm_access.roles\n// Admin users are allowed to do everything\nif(user_roles.contains('Administrator')){\n  return JsonOutput.toJson(content)\n} \n\ndef authToken = request.headers.get(\"Authorization\").first()\n// Check ownership and visibility\ndef contentArray = []\ncontent.each {\n    def reqURL2 = \"@DASH_IP@/gw/sdkapi/sdk/services/\" + it.serviceId\n\n  URLConnection connectionF = reqURL2.toURL().openConnection();\n  connectionF.setRequestProperty (\"Authorization\", authToken);\n  if(connectionF.responseCode <= 299){\n    contentArray.add(it)\n  } \n  \n}\n\nreturn JsonOutput.toJson(contentArray)"
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            }
+        ],
+        "/sdk/functions/:functionId/vnfd": [
+            {
+                "methods": [
+                    "GET"
+                ],
+                "groovy": {
+                    "onRequestScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport groovy.json.JsonSlurper\n\n// Get function id\nfunctionId = request.uri.split(\"/\").last()\n// Get User access level\ndef jsonSlurper = new JsonSlurper();\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef userLevel = auth_content.accessLevel\ndef username = auth_content.username\ndef user_roles = auth_content.realm_access.roles\n// Admin users are allowed to do everything\nif(user_roles.contains('Administrator')){\n  return\n} \n\n// Get function to evaluate Authorization conditions\n// Query Service ID\ndef reqURL = \"@SDK_IP_PORT@/sdk/functions/\" + functionId\nURLConnection connection = reqURL.toURL().openConnection();\nStringBuffer functionResp = new StringBuffer();\n\nif(connection.responseCode == 404){\n  \tresult.state = State.FAILURE\n    result.code = 404\n  return\n} else {\n  BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));\n  \n  String inputLine;\n  while ((inputLine = reader.readLine()) != null)\n  {\n      functionResp.append(inputLine)\n  }\n  reader.close();\n}\n\n// Parse users in slice\ndef jsonSlurper2 = new JsonSlurper()\nf = jsonSlurper2.parseText(functionResp.toString())\n\n// Validate Ownership and visibility\nif(username != f.ownerId && f.visibility == \"PRIVATE\"){\n  result.state = State.FAILURE\n  result.code = 403\n  return \n}\n\n// Validate Access Level\nif(username != f.ownerId && userLevel > f.accessLevel){\n  result.state = State.FAILURE\n  result.code = 403\n  return \n}\n\n// Query Slice\nreqURL = \"@SDK_IP_PORT@/sdk/sliceManagement/slices/\" + f.sliceId\nconnection = reqURL.toURL().openConnection();\nStringBuffer sliceResp = new StringBuffer();\nif(connection.responseCode == 404){\n  \tresult.state = State.FAILURE\n    result.code = 404\n  return\n} else {\n  BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));\n  \n  String inputLine;\n  while ((inputLine = reader.readLine()) != null)\n  {\n      sliceResp.append(inputLine)\n  }\n  reader.close();\n}\n\n// Parse users in slice\ndef jsonSlurper3 = new JsonSlurper()\nslice = jsonSlurper3.parseText(sliceResp.toString())\n\n// Check if user in slice\nif(!slice[\"users\"].contains(username)){\n    result.state = State.FAILURE\n    result.code = 403\n    return\n}"
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            }
+        ],
+        "/sdk/functions/:functionId/unpublish": [
+            {
+                "methods": [
+                    "POST"
+                ],
+                "groovy": {
+                    "onRequestScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport groovy.json.JsonSlurper\n\n// Get function id\nfunctionId = request.uri.split(\"/\")[-3]\n// Get User access level\ndef jsonSlurper = new JsonSlurper();\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef userLevel = auth_content.accessLevel\ndef username = auth_content.username\ndef user_roles = auth_content.realm_access.roles\n// Admin users are allowed to do everything\nif(user_roles.contains('Administrator')){\n  return\n} \n\n// Get function to evaluate Authorization conditions\n// Query Service ID\ndef reqURL = \"@SDK_IP_PORT@/sdk/functions/\" + functionId\nURLConnection connection = reqURL.toURL().openConnection();\nStringBuffer functionResp = new StringBuffer();\n\nif(connection.responseCode == 404){\n  \tresult.state = State.FAILURE\n    result.code = 404\n  return\n} else {\n  BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));\n  \n  String inputLine;\n  while ((inputLine = reader.readLine()) != null)\n  {\n      functionResp.append(inputLine)\n  }\n  reader.close();\n}\n\n// Parse users in slice\ndef jsonSlurper2 = new JsonSlurper()\nf = jsonSlurper2.parseText(functionResp.toString())\n\n// Validate Ownership and visibility\nif(username != f.ownerId){\n  result.state = State.FAILURE\n  result.code = 403\n  return \n}"
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            }
+        ],
+        "/sdk/functions/:functionId/publish": [
+            {
+                "methods": [
+                    "POST"
+                ],
+                "groovy": {
+                    "onRequestScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport groovy.json.JsonSlurper\n\n// Get function id\nfunctionId = request.uri.split(\"/\")[-3]\n// Get User access level\ndef jsonSlurper = new JsonSlurper();\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef userLevel = auth_content.accessLevel\ndef username = auth_content.username\ndef user_roles = auth_content.realm_access.roles\n// Admin users are allowed to do everything\nif(user_roles.contains('Administrator')){\n  return\n} \n\n// Get function to evaluate Authorization conditions\n// Query Service ID\ndef reqURL = \"@SDK_IP_PORT@/sdk/functions/\" + functionId\nURLConnection connection = reqURL.toURL().openConnection();\nStringBuffer functionResp = new StringBuffer();\n\nif(connection.responseCode == 404){\n  \tresult.state = State.FAILURE\n    result.code = 404\n  return\n} else {\n  BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));\n  \n  String inputLine;\n  while ((inputLine = reader.readLine()) != null)\n  {\n      functionResp.append(inputLine)\n  }\n  reader.close();\n}\n\n// Parse users in slice\ndef jsonSlurper2 = new JsonSlurper()\nf = jsonSlurper2.parseText(functionResp.toString())\n\n// Validate Ownership and visibility\nif(username != f.ownerId){\n  result.state = State.FAILURE\n  result.code = 403\n  return \n}"
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            }
+        ],
+        "/sdk/functions/:functionId/monitoring_params/:monitoringParameterId": [
+            {
+                "methods": [
+                    "DELETE"
+                ],
+                "groovy": {
+                    "onRequestScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport groovy.json.JsonSlurper\n\n// Get function id\nfunctionId = request.uri.split(\"/\")[-3]\n// Get User access level\ndef jsonSlurper = new JsonSlurper();\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef userLevel = auth_content.accessLevel\ndef username = auth_content.username\ndef user_roles = auth_content.realm_access.roles\n// Admin users are allowed to do everything\nif(user_roles.contains('Administrator')){\n  return\n} \n\n// Composer can only read publish and unpublish\nif(user_roles.contains('composer') && !user_roles.contains('designer')){\n  result.state = State.FAILURE\n  result.code = 403\n}\n\n// Get function to evaluate Authorization conditions\n// Query Service ID\ndef reqURL = \"@SDK_IP_PORT@/sdk/functions/\" + functionId\nURLConnection connection = reqURL.toURL().openConnection();\nStringBuffer functionResp = new StringBuffer();\n\nif(connection.responseCode == 404){\n  \tresult.state = State.FAILURE\n    result.code = 404\n  return\n} else {\n  BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));\n  \n  String inputLine;\n  while ((inputLine = reader.readLine()) != null)\n  {\n      functionResp.append(inputLine)\n  }\n  reader.close();\n}\n\n// Parse users in slice\ndef jsonSlurper2 = new JsonSlurper()\nf = jsonSlurper2.parseText(functionResp.toString())\n\n// Validate Ownership and visibility\nif(username != f.ownerId){\n  result.state = State.FAILURE\n  result.code = 403\n  return \n}"
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            }
+        ],
+        "/sdk/functions/:functionId/monitoring_params": [
+            {
+                "methods": [
+                    "GET"
+                ],
+                "groovy": {
+                    "onRequestScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport groovy.json.JsonSlurper\n\n// Get function id\nfunctionId = request.uri.split(\"/\")[-2]\n// Get User access level\ndef jsonSlurper = new JsonSlurper();\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef userLevel = auth_content.accessLevel\ndef username = auth_content.username\ndef user_roles = auth_content.realm_access.roles\n// Admin users are allowed to do everything\nif(user_roles.contains('Administrator')){\n  return\n} \n\n// Get function to evaluate Authorization conditions\n// Query Service ID\ndef reqURL = \"@SDK_IP_PORT@/sdk/functions/\" + functionId\nURLConnection connection = reqURL.toURL().openConnection();\nStringBuffer functionResp = new StringBuffer();\n\nif(connection.responseCode == 404){\n  \tresult.state = State.FAILURE\n    result.code = 404\n  return\n} else {\n  BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));\n  \n  String inputLine;\n  while ((inputLine = reader.readLine()) != null)\n  {\n      functionResp.append(inputLine)\n  }\n  reader.close();\n}\n\n// Parse users in slice\ndef jsonSlurper2 = new JsonSlurper()\nf = jsonSlurper2.parseText(functionResp.toString())\n\n// Validate Ownership and visibility\nif(username != f.ownerId && f.visibility == \"PRIVATE\"){\n  result.state = State.FAILURE\n  result.code = 403\n  return \n}\n\n// Validate Access Level\nif(username != f.ownerId && userLevel > f.accessLevel){\n  result.state = State.FAILURE\n  result.code = 403\n  return \n}\n\n// Query Slice\nreqURL = \"@SDK_IP_PORT@/sdk/sliceManagement/slices/\" + f.sliceId\nconnection = reqURL.toURL().openConnection();\nStringBuffer sliceResp = new StringBuffer();\nif(connection.responseCode == 404){\n  \tresult.state = State.FAILURE\n    result.code = 404\n  return\n} else {\n  BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));\n  \n  String inputLine;\n  while ((inputLine = reader.readLine()) != null)\n  {\n      sliceResp.append(inputLine)\n  }\n  reader.close();\n}\n\n// Parse users in slice\ndef jsonSlurper3 = new JsonSlurper()\nslice = jsonSlurper3.parseText(sliceResp.toString())\n\n// Check if user in slice\nif(!slice[\"users\"].contains(username)){\n    result.state = State.FAILURE\n    result.code = 403\n    return\n}"
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            },
+            {
+                "methods": [
+                    "PUT"
+                ],
+                "groovy": {
+                    "onRequestScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport groovy.json.JsonSlurper\n\n// Get function id\nfunctionId = request.uri.split(\"/\")[-2]\n// Get User access level\ndef jsonSlurper = new JsonSlurper();\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef userLevel = auth_content.accessLevel\ndef username = auth_content.username\ndef user_roles = auth_content.realm_access.roles\n// Admin users are allowed to do everything\nif(user_roles.contains('Administrator')){\n  return\n} \n\n// Get function to evaluate Authorization conditions\n// Query Service ID\ndef reqURL = \"@SDK_IP_PORT@/sdk/functions/\" + functionId\nURLConnection connection = reqURL.toURL().openConnection();\nStringBuffer functionResp = new StringBuffer();\n\nif(connection.responseCode == 404){\n  \tresult.state = State.FAILURE\n    result.code = 404\n  return\n} else {\n  BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));\n  \n  String inputLine;\n  while ((inputLine = reader.readLine()) != null)\n  {\n      functionResp.append(inputLine)\n  }\n  reader.close();\n}\n\n// Parse users in slice\ndef jsonSlurper2 = new JsonSlurper()\nf = jsonSlurper2.parseText(functionResp.toString())\n\n// Validate Ownership and visibility\nif(username != f.ownerId){\n  result.state = State.FAILURE\n  result.code = 403\n  return \n}"
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            }
+        ],
+        "/sdk/functions/:functionId": [
+            {
+                "methods": [
+                    "GET"
+                ],
+                "groovy": {
+                    "onRequestScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport groovy.json.JsonSlurper\n\n// Get function id\nfunctionId = request.uri.split(\"/\").last()\n// Get User access level\ndef jsonSlurper = new JsonSlurper();\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef userLevel = auth_content.accessLevel\ndef username = auth_content.username\ndef user_roles = auth_content.realm_access.roles\n// Admin users are allowed to do everything\nif(user_roles.contains('Administrator')){\n  return\n} \n\n// Get function to evaluate Authorization conditions\n// Query Service ID\ndef reqURL = \"@SDK_IP_PORT@/sdk/functions/\" + functionId\nURLConnection connection = reqURL.toURL().openConnection();\nStringBuffer functionResp = new StringBuffer();\n\nif(connection.responseCode == 404){\n  \tresult.state = State.FAILURE\n    result.code = 404\n  return\n} else {\n  BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));\n  \n  String inputLine;\n  while ((inputLine = reader.readLine()) != null)\n  {\n      functionResp.append(inputLine)\n  }\n  reader.close();\n}\n\n// Parse users in slice\ndef jsonSlurper2 = new JsonSlurper()\nf = jsonSlurper2.parseText(functionResp.toString())\n\n// Validate Ownership and visibility\nif(username != f.ownerId && f.visibility == \"PRIVATE\"){\n  result.state = State.FAILURE\n  result.code = 403\n  return \n}\n\n// Validate Access Level\nif(username != f.ownerId && userLevel > f.accessLevel){\n  result.state = State.FAILURE\n  result.code = 403\n  return \n}\n\n// Query Slice\nreqURL = \"@SDK_IP_PORT@/sdk/sliceManagement/slices/\" + f.sliceId\nconnection = reqURL.toURL().openConnection();\nStringBuffer sliceResp = new StringBuffer();\nif(connection.responseCode == 404){\n  \tresult.state = State.FAILURE\n    result.code = 404\n  return\n} else {\n  BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));\n  \n  String inputLine;\n  while ((inputLine = reader.readLine()) != null)\n  {\n      sliceResp.append(inputLine)\n  }\n  reader.close();\n}\n\n// Parse users in slice\ndef jsonSlurper3 = new JsonSlurper()\nslice = jsonSlurper3.parseText(sliceResp.toString())\n\n// Check if user in slice\nif(!slice[\"users\"].contains(username)){\n    result.state = State.FAILURE\n    result.code = 403\n    return\n}",
+                    "onResponseContentScript": ""
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            },
+            {
+                "methods": [
+                    "DELETE"
+                ],
+                "groovy": {
+                    "onRequestScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport groovy.json.JsonSlurper\n\n// Get function id\nfunctionId = request.uri.split(\"/\").last()\n// Get User access level\ndef jsonSlurper = new JsonSlurper();\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef userLevel = auth_content.accessLevel\ndef username = auth_content.username\ndef user_roles = auth_content.realm_access.roles\n// Admin users are allowed to do everything\nif(user_roles.contains('Administrator')){\n  return\n} \n\n// Composer can only read publish and unpublish\nif(user_roles.contains('composer') && !user_roles.contains('designer')){\n  result.state = State.FAILURE\n  result.code = 403\n}\n\n\n// Get function to evaluate Authorization conditions\n// Query Service ID\ndef reqURL = \"@SDK_IP_PORT@/sdk/functions/\" + functionId\nURLConnection connection = reqURL.toURL().openConnection();\nStringBuffer functionResp = new StringBuffer();\n\nif(connection.responseCode == 404){\n  \tresult.state = State.FAILURE\n    result.code = 404\n  return\n} else {\n  BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));\n  \n  String inputLine;\n  while ((inputLine = reader.readLine()) != null)\n  {\n      functionResp.append(inputLine)\n  }\n  reader.close();\n}\n\n// Parse users in slice\ndef jsonSlurper2 = new JsonSlurper()\nf = jsonSlurper2.parseText(functionResp.toString())\n\n// Validate Ownership and visibility\nif(username != f.ownerId){\n  result.state = State.FAILURE\n  result.code = 403\n  return \n}"
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            }
+        ],
+        "/sdk/functions/": [
+            {
+                "methods": [
+                    "GET"
+                ],
+                "groovy": {
+                    "onRequestScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport groovy.json.JsonSlurper\n\n// Check query parameter\ngoodReq = request.uri.contains(\"sliceId=\")\nif(!goodReq){\n  \tresult.state = State.FAILURE\n    result.code = 400\n    return\n}\n// Get SliceId\nparameters = request.uri.split(\"\\\\?\").last()\nparameters = parameters.split(\"&\")\n// Convert parameters to map\ndef map = parameters.collectEntries { param -> param.split('=').collect { URLDecoder.decode(it) }}\n\n// Query Slice ID\ndef reqURL = \"@SDK_IP_PORT@/sdk/sliceManagement/slices/\" + map[\"sliceId\"]\nURLConnection connection = reqURL.toURL().openConnection();\nStringBuffer response = new StringBuffer();\n\nif(connection.responseCode == 404){\n  \tresult.state = State.FAILURE\n    result.code = 404\n  return\n} else {\n  BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));\n  \n  String inputLine;\n  while ((inputLine = reader.readLine()) != null)\n  {\n      response.append(inputLine)\n  }\n  reader.close();\n}\n\n// Validate user admin role\ndef jsonSlurper = new JsonSlurper();\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef user_roles = auth_content.realm_access.roles\n// Admin users are allowed to do everything\nif(user_roles.contains('Administrator')){\n  return\n}\n\n// Parse users in slice\ndef jsonSlurper2 = new JsonSlurper()\nslice = jsonSlurper2.parseText(response.toString())\n\n// Check if user in slice\ndef username = auth_content.username\nif(!slice[\"users\"].contains(username)){\n    result.state = State.FAILURE\n    result.code = 403\n    return\n}",
+                    "onResponseContentScript": "import groovy.json.JsonOutput\nimport groovy.json.JsonSlurper\n\n// Convert response to Map\ndef jsonSlurper = new JsonSlurper()\ndef content = jsonSlurper.parseText(response.content)\n\n// Get User access level\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef userLevel = auth_content.accessLevel\ndef username = auth_content.username\ndef user_roles = auth_content.realm_access.roles\n// Admin users are allowed to do everything\nif(user_roles.contains('Administrator')){\n  return JsonOutput.toJson(content)\n} \n\n// Check ownership and visibility\ncontent.removeAll {username != it.ownerId && it.visibility == \"PRIVATE\"}\ncontent.removeAll {username != it.ownerId && userLevel > it.accessLevel}\n\nreturn JsonOutput.toJson(content)"
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            },
+            {
+                "methods": [
+                    "POST"
+                ],
+                "groovy": {
+                    "onRequestContentScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport groovy.json.JsonSlurper\nimport groovy.json.JsonOutput\n\n// Get SliceId\ndef jsonSlurper = new JsonSlurper();\ndef reqContent = jsonSlurper.parseText(request.content);\nif (!reqContent || !reqContent.containsKey(\"sliceId\")){\n\tresult.state = State.FAILURE;\n    result.code = 400;\n}\nsliceId = reqContent[\"sliceId\"]\n\n// Validate user admin role\ndef jsonSlurper2 = new JsonSlurper();\ndef auth_content = jsonSlurper2.parseText(context.attributes['oauth.payload']);\ndef user_roles = auth_content.realm_access.roles\ndef username = auth_content.username\nreqContent[\"ownerId\"] = username\n// Admin users are allowed to do everything\nif(user_roles.contains('Administrator')){\n  return JsonOutput.toJson(reqContent);\n}\n\n// Composer can only read publish and unpublish\nif(user_roles.contains('composer') && !user_roles.contains('designer')){\n  result.state = State.FAILURE\n  result.code = 403\n}\n\n// Query Slice ID\ndef reqURL = \"@SDK_IP_PORT@/sdk/sliceManagement/slices/\" + sliceId\nURLConnection connection = reqURL.toURL().openConnection();\nStringBuffer response = new StringBuffer();\n\nif(connection.responseCode == 404){\n  result.state = State.FAILURE\n  result.code = 404\n  return\n} else {\n  BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));\n  \n  String inputLine;\n  while ((inputLine = reader.readLine()) != null)\n  {\n      response.append(inputLine)\n  }\n  reader.close();\n}\n\n// Parse users in slice\ndef jsonSlurper3 = new JsonSlurper()\nslice = jsonSlurper3.parseText(response.toString())\n\n// Check if user in slice\nif(!slice[\"users\"].contains(username)){\n    result.state = State.FAILURE\n    result.code = 403\n    return\n}\n\n\n\nreturn JsonOutput.toJson(reqContent);"
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            },
+            {
+                "methods": [
+                    "PUT"
+                ],
+                "groovy": {
+                    "onRequestContentScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport groovy.json.JsonSlurper\nimport groovy.json.JsonOutput\n\n// Get req info\ndef jsonSlurper = new JsonSlurper();\ndef reqContent = jsonSlurper.parseText(request.content);\nif (!reqContent || !reqContent.containsKey(\"sliceId\") || !reqContent.containsKey(\"ownerId\") || !reqContent.containsKey(\"id\")){\n\tresult.state = State.FAILURE;\n    result.code = 400;\n}\nfId = reqContent[\"id\"]\n\n// Validate user admin role\ndef jsonSlurper2 = new JsonSlurper();\ndef auth_content = jsonSlurper2.parseText(context.attributes['oauth.payload']);\ndef user_roles = auth_content.realm_access.roles\ndef username = auth_content.username\n// Admin users are allowed to do everything\nif(user_roles.contains('Administrator')){\n  return JsonOutput.toJson(reqContent);\n}\n\n// Composer can only read publish and unpublish\nif(user_roles.contains('composer') && !user_roles.contains('designer')){\n  result.state = State.FAILURE\n  result.code = 403\n}\n\n// Query function to update\ndef reqURL = \"@SDK_IP_PORT@/sdk/functions/\" + fId\nURLConnection connection = reqURL.toURL().openConnection();\nStringBuffer functionResp = new StringBuffer();\n\nif(connection.responseCode == 404){\n  \tresult.state = State.FAILURE\n    result.code = 404\n    return\n} else {\n  BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));\n  \n  String inputLine;\n  while ((inputLine = reader.readLine()) != null)\n  {\n      functionResp.append(inputLine)\n  }\n  reader.close();\n}\n\n// Check if reported owner is the function's owner\ndef jsonSlurper3 = new JsonSlurper()\nf = jsonSlurper3.parseText(functionResp.toString())\n\nif(f[\"ownerId\"] != username){\n  \tresult.state = State.FAILURE;\n    result.code = 403;\n    return\n}\n\nreturn JsonOutput.toJson(reqContent);"
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            }
+        ],
+        "/": []
+    },
+    "services": {
+        "discovery": {
+            "enabled": false
+        }
+    },
+    "resources": [
+        {
+            "name": "oauth",
+            "type": "oauth2",
+            "enabled": true,
+            "configuration": {
+                "authorizationServerUrl": "@DASH_IP@/auth/realms/5gcity",
+                "introspectionEndpoint": "/protocol/openid-connect/token/introspect",
+                "introspectionEndpointMethod": "POST",
+                "scopeSeparator": " ",
+                "userInfoEndpoint": "/protocol/openid-connect/userinfo",
+                "userInfoEndpointMethod": "GET",
+                "useClientAuthorizationHeader": true,
+                "clientAuthorizationHeaderName": "Authorization",
+                "clientAuthorizationHeaderScheme": "Basic",
+                "tokenIsSuppliedByQueryParam": false,
+                "tokenQueryParamName": "token",
+                "tokenIsSuppliedByHttpHeader": false,
+                "tokenIsSuppliedByFormUrlEncoded": true,
+                "tokenFormUrlEncodedName": "token",
+                "clientId": "my_client",
+                "clientSecret": "348e4121-2a64-4a4c-9cc7-7111b3f25621"
+            }
+        }
+    ],
+    "members": [
+        {
+            "source": "memory",
+            "sourceId": "admin",
+            "role": "PRIMARY_OWNER"
+        }
+    ],
+    "pages": [],
+    "plans": [
+        {
+            "id": "0af0b17a-3772-4918-b0b1-7a3772e918da",
+            "name": "Oauth2",
+            "description": "Plan using Oauth2",
+            "validation": "MANUAL",
+            "security": "OAUTH2",
+            "securityDefinition": "{\"extractPayload\":true,\"checkRequiredScopes\":false,\"requiredScopes\":[],\"oauthResource\":\"oauth\"}",
+            "type": "API",
+            "status": "PUBLISHED",
+            "apis": [
+                "035906de-21c1-4452-9906-de21c1745288"
+            ],
+            "order": 0,
+            "characteristics": [],
+            "created_at": 1570023562334,
+            "updated_at": 1570023562334,
+            "paths": {
+                "/": []
+            },
+            "excluded_groups": [],
+            "comment_required": false
+        }
+    ],
+    "path_mappings": [
+        "/sdk/services/:serviceId/monitoring_params",
+        "/sdk/functions/:functionId/monitoring_params/:monitoringParameterId",
+        "/sdk/functions/:functionId/vnfd",
+        "/sdk/functions/:functionId/unpublish",
+        "/sdk/sliceManagement/slices",
+        "/sdk/sliceManagement/slices/:sliceId/users/:userName",
+        "/sdk/functions/:functionId/monitoring_params",
+        "/sdk/services/:serviceId/monitoring_params/:monitoringParameterId",
+        "/sdk/services/service/:serviceId/publish",
+        "/",
+        "/sdk/functions/",
+        "/sdk/service_descriptor/",
+        "/sdk/service_descriptor/:serviceDescriptorId/nsd",
+        "/sdk/sliceManagement/slices/:sliceId",
+        "/sdk/service_descriptor/:serviceDescriptorId/publish",
+        "/sdk/services/",
+        "/sdk/service_descriptor/:serviceDescriptorId",
+        "/sdk/services/:serviceId/create_descriptor",
+        "/sdk/service_descriptor/:serviceDescriptorId/unpublish",
+        "/sdk/functions/:functionId",
+        "/sdk/functions/:functionId/publish",
+        "/sdk/services/:serviceId"
+    ],
+    "proxy": {
+        "context_path": "/sdkapi",
+        "strip_context_path": false,
+        "groups": [
+            {
+                "name": "default-group",
+                "endpoints": [
+                    {
+                        "name": "default",
+                        "target": "@SDK_IP_PORT@/",
+                        "weight": 1,
+                        "backup": false,
+                        "type": "HTTP",
+                        "http": {
+                            "connectTimeout": 5000,
+                            "idleTimeout": 60000,
+                            "keepAlive": true,
+                            "readTimeout": 10000,
+                            "pipelining": false,
+                            "maxConcurrentConnections": 100,
+                            "useCompression": true,
+                            "followRedirects": false
+                        },
+                        "ssl": {
+                            "trustAll": true,
+                            "hostnameVerifier": false
+                        }
+                    }
+                ],
+                "load_balancing": {
+                    "type": "ROUND_ROBIN"
+                }
+            }
+        ],
+        "cors": {
+            "enabled": true,
+            "allowCredentials": false,
+            "allowOrigin": [
+                "*"
+            ],
+            "allowHeaders": [
+                "authorization",
+                "content-type"
+            ],
+            "allowMethods": [
+                "DELETE",
+                "POST",
+                "GET",
+                "PATCH",
+                "PUT"
+            ],
+            "exposeHeaders": [],
+            "maxAge": -1
+        }
+    }
+}

@@ -1,0 +1,36 @@
+{
+    "data": [
+        {
+            "id": "80e962d0-a010-4b09-a962-d0a010cb09e0",
+            "api": "035906de-21c1-4452-9906-de21c1745288",
+            "plan": "0af0b17a-3772-4918-b0b1-7a3772e918da",
+            "application": "c3bcc9f5-d443-48bf-bcc9-f5d44398bfab",
+            "status": "accepted",
+            "processed_at": 1570023563212,
+            "processed_by": "35f2796c-6d53-4835-b279-6c6d539835c1",
+            "subscribed_by": "35f2796c-6d53-4835-b279-6c6d539835c1",
+            "starting_at": 1570023563208,
+            "created_at": 1570023563177,
+            "updated_at": 1570023563177,
+            "client_id": "my_client"
+        }
+    ],
+    "metadata": {
+        "035906de-21c1-4452-9906-de21c1745288": {
+            "name": "5GCity SDK REST API"
+        },
+        "c3bcc9f5-d443-48bf-bcc9-f5d44398bfab": {
+            "name": "5GCity Client"
+        },
+        "0af0b17a-3772-4918-b0b1-7a3772e918da": {
+            "name": "Oauth2"
+        }
+    },
+    "page": {
+        "current": 1,
+        "size": 1,
+        "per_page": 20,
+        "total_pages": 1,
+        "total_elements": 1
+    }
+}

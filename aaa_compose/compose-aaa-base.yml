@@ -7,10 +7,23 @@ volumes:
 
 services:
 
+  dashboard:
+    build:
+      context: DASH_PATH
+      args:
+        - API_BASE_URL=http://SERVER_NAME/gw/slicemanagerapi
+        - AUTH_SERVER_URL=http://SERVER_NAME/auth
+
+
   # --------------------
   # Auxiliary Services
   # --------------------
-
+  nginx-service:
+    image: nginx
+    restart: always
+    volumes:
+    ports:
+      - 80:80
 
   postgresdb:
     hostname: postgresql
@@ -23,6 +36,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   elasticsearch:
+    hostname: aaaelasticsearch
     image: docker.elastic.co/elasticsearch/elasticsearch:5.4.3
     volumes:
       - elastic_data:/usr/share/elasticsearch/data
@@ -39,23 +53,19 @@ services:
         soft: -1
         hard: -1
       nofile: 65536
-    ports:
-      - "9200:9200"
 
   mongodb:
+    hostname: aaamongodb
     image: mongo:3.4
     volumes:
       - mongo_data:/data/db
-    ports:
-      - "27017:27017"
 
   # --------------------
   # GRAVITEE Services
   # --------------------
 
   gravitee_gateway:
-    image: graviteeio/gateway:latest
-    network_mode: host
+    image: graviteeio/gateway:1.21.3
     depends_on:
       - mongodb
       - elasticsearch
@@ -64,32 +74,29 @@ services:
       - ./scripts/gateway:/etc/gravitee.io/scripts
     environment:
       - GRAVITEE_HTTP_PORT=8000
-      - GRAVITEE_MANAGEMENT_MONGODB_URI=mongodb://0.0.0.0:27017/gravitee?serverSelectionTimeoutMS=5000&connectTimeoutMS=5000&socketTimeoutMS=5000
-      - GRAVITEE_REPORTERS_ELASTICSEARCH_ENDPOINTS_0=http://0.0.0.0:9200
+      - GRAVITEE_MANAGEMENT_MONGODB_URI=mongodb://mongodb:27017/gravitee?serverSelectionTimeoutMS=5000&connectTimeoutMS=5000&socketTimeoutMS=5000
+      - GRAVITEE_REPORTERS_ELASTICSEARCH_ENDPOINTS_0=http://elasticsearch:9200
 
   management_api:
-    image: graviteeio/management-api:latest
-    network_mode: host
+    image: graviteeio/management-api:1.21.3
     depends_on:
       - mongodb
       - elasticsearch
     volumes:
       - ./logs/management-api:/home/gravitee/logs
+      - ./gravitee/api/gravitee.yml:/opt/graviteeio-management-api/config/gravitee.yml
     environment:
-      - GRAVITEE_MANAGEMENT_MONGODB_URI=mongodb://0.0.0.0:27017/gravitee?serverSelectionTimeoutMS=5000&connectTimeoutMS=5000&socketTimeoutMS=5000
-      - GRAVITEE_ANALYTICS_ELASTICSEARCH_ENDPOINTS_0=http://0.0.0.0:9200
+      - GRAVITEE_MANAGEMENT_MONGODB_URI=mongodb://mongodb:27017/gravitee?serverSelectionTimeoutMS=5000&connectTimeoutMS=5000&socketTimeoutMS=5000
+      - GRAVITEE_ANALYTICS_ELASTICSEARCH_ENDPOINTS_0=http://elasticsearch:9200
 
   management_ui:
-    image: graviteeio/management-ui:latest
+    image: graviteeio/management-ui:1.21.3
     volumes:
       - ./logs/management-ui:/var/log/httpd
     environment:
-      - MGMT_API_URL=http://localhost:8083/management/
+      - MGMT_API_URL=http://SERVER_NAME/management/api/management/
     links:
       - "management_api:management_api"
-    ports:
-      - "8092:80"
-
 
   # --------------------
   # Keycloak Services
@@ -102,6 +109,8 @@ services:
       - postgresdb
     links:
       - "postgresdb:postgresql"
+    volumes:
+      - ../keycloak/themes/5gcity-theme/:/opt/jboss/keycloak/themes/5gcity/
     environment:
       - KEYCLOAK_USER=admin
       - KEYCLOAK_PASSWORD=admin
@@ -112,6 +121,4 @@ services:
       - DB_PASSWORD=keycloak
       - DB_PORT=5432
       - ROOT_LOGLEVEL=INFO
-      - AAA_AUTH_BASE_URL=http://localhost:8080/auth
-    ports:
-      - "8080:8080"
+      - PROXY_ADDRESS_FORWARDING=true

@@ -12,18 +12,18 @@
     "email" : "5gcityadmin@ubiwhere.com",
     "attributes" : {
       "tenant_label" : [ "Administration" ],
-      "os_id" : [ "5bea9adcd306de4e74c0bbcd" ]
+      "os_id" : [ "5d2476763b9adf092651abd0" ]
     },
     "credentials" : [ {
       "type" : "password",
-      "hashedSaltedValue" : "E83KFM8NKn+eJLm3gAV9ArKvJzXABW6xlc1e3wG1W2uSb7CqCbXG4R9MFycHvLNHmrA3d7uDTiqjhnBDLjwpmA==",
-      "salt" : "VwEHj76T5yuk4roNoV96dw==",
+      "hashedSaltedValue" : "sXV5XsdsG6wq3jOTHRgFGmfgdHECaSth09QPh1eFPnF7EUDHUkcbSs9bVq4Ms2i/YzLG5m7x1id9Lp18z+6dgA==",
+      "salt" : "YwGYxKlLqNwkdC6zuDe/PA==",
       "hashIterations" : 27500,
       "counter" : 0,
       "algorithm" : "pbkdf2-sha256",
       "digits" : 0,
       "period" : 0,
-      "createdDate" : 1542302470882,
+      "createdDate" : 1551092694404,
       "config" : { }
     } ],
     "disableableCredentialTypes" : [ "password" ],
@@ -31,6 +31,250 @@
     "realmRoles" : [ "offline_access", "Administrator" ],
     "clientRoles" : {
       "account" : [ "manage-account", "view-profile" ]
+    },
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
+    "id" : "985f4077-0e5d-4d02-b9e9-f85d799588cd",
+    "createdTimestamp" : 1564496546594,
+    "username" : "davide.desirello",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : true,
+    "firstName" : "Davide",
+    "lastName" : "Desirello",
+    "email" : "davide.desirello@rai.it",
+    "attributes" : {
+      "tenant_label" : [ "UC4RAI" ],
+      "os_id" : [ "5d4052033b9adf24583db223" ]
+    },
+    "credentials" : [ {
+      "type" : "password",
+      "hashedSaltedValue" : "q2DMuFMAvBsEw2fw5Uk+87kknA4YrQvFW1+jzT43Z87iuZ4XMAFsVB66XxdrZKW9k4pl3H3s5C/W7HMhJH0/Dg==",
+      "salt" : "XYzcg5aYntMABEfuT4SfJQ==",
+      "hashIterations" : 27500,
+      "counter" : 0,
+      "algorithm" : "pbkdf2-sha256",
+      "digits" : 0,
+      "period" : 0,
+      "createdDate" : 1564496832801,
+      "config" : { }
+    } ],
+    "disableableCredentialTypes" : [ "password" ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "offline_access", "User", "uma_authorization" ],
+    "clientRoles" : {
+      "account" : [ "manage-account", "view-profile" ]
+    },
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
+    "id" : "32617a37-efae-4793-9b14-79ed02b65fa2",
+    "createdTimestamp" : 1562774986353,
+    "username" : "hack_team_1",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : true,
+    "firstName" : "Hack",
+    "lastName" : "Team 1",
+    "email" : "hack_team_1@hack.com",
+    "attributes" : {
+      "tenant_label" : [ "hack_team_1" ],
+      "os_id" : [ "5d260d3f3b9adf636fe4a604" ]
+    },
+    "credentials" : [ {
+      "type" : "password",
+      "hashedSaltedValue" : "GlHS8pcH7pabkfFcI1d/kW8zIiel+xdMmGRgwxIWhCrUKCH++rwdmHtUpeWaCWQkQJDvTb7+dfaM0c+mjcoREQ==",
+      "salt" : "Xf6JVNIKQ1vZPcPA6Ug6pA==",
+      "hashIterations" : 27500,
+      "counter" : 0,
+      "algorithm" : "pbkdf2-sha256",
+      "digits" : 0,
+      "period" : 0,
+      "createdDate" : 1562775070476,
+      "config" : { }
+    } ],
+    "disableableCredentialTypes" : [ "password" ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "offline_access", "User", "uma_authorization" ],
+    "clientRoles" : {
+      "account" : [ "manage-account", "view-profile" ],
+      "5gcatalogue-be" : [ "ROLE_ADMIN", "ROLE_USER" ]
+    },
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
+    "id" : "8e0c1530-dc7b-4d44-a9cd-fd0b96cdad85",
+    "createdTimestamp" : 1562775211876,
+    "username" : "hack_team_2",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : true,
+    "firstName" : "Hack",
+    "lastName" : "Team 2",
+    "email" : "hack_team_2@hack.com",
+    "attributes" : {
+      "tenant_label" : [ "hack_team_2" ],
+      "os_id" : [ "5d260e993b9adf636fe4a605" ]
+    },
+    "credentials" : [ {
+      "type" : "password",
+      "hashedSaltedValue" : "63iTP/w4Prb4iptXGdu9WOUSM0GhDp4r35EmEA35CN0RZIuOwwcxZkPBdl+4cAUnX4eASw5BFAZQDsOPaa3gzQ==",
+      "salt" : "vkmJFumHctugxdmStM8p+Q==",
+      "hashIterations" : 27500,
+      "counter" : 0,
+      "algorithm" : "pbkdf2-sha256",
+      "digits" : 0,
+      "period" : 0,
+      "createdDate" : 1562775331779,
+      "config" : { }
+    } ],
+    "disableableCredentialTypes" : [ "password" ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "offline_access", "User", "uma_authorization" ],
+    "clientRoles" : {
+      "account" : [ "manage-account", "view-profile" ],
+      "5gcatalogue-be" : [ "ROLE_ADMIN", "ROLE_USER" ]
+    },
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
+    "id" : "10f9b1e7-3b4f-480c-b8a2-5afa00596a1e",
+    "createdTimestamp" : 1562775360856,
+    "username" : "hack_team_3",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : true,
+    "firstName" : "Hack",
+    "lastName" : "Team 3",
+    "email" : "hack_team_3@hack.com",
+    "attributes" : {
+      "tenant_label" : [ "hack_team_3" ],
+      "os_id" : [ "5d260f113b9adf636fe4a606" ]
+    },
+    "credentials" : [ {
+      "type" : "password",
+      "hashedSaltedValue" : "abpCMF4nwZ4BJBfUTQd8lWu9T1EYGjrrqmfzRi96MtP0Q/yBJ6KaUapa2zuefF14KsCrhQGVUru2QRDSYGpSHw==",
+      "salt" : "/chkGrvN0cCanLTWFHGj0A==",
+      "hashIterations" : 27500,
+      "counter" : 0,
+      "algorithm" : "pbkdf2-sha256",
+      "digits" : 0,
+      "period" : 0,
+      "createdDate" : 1562775368596,
+      "config" : { }
+    } ],
+    "disableableCredentialTypes" : [ "password" ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "offline_access", "User", "uma_authorization" ],
+    "clientRoles" : {
+      "account" : [ "manage-account", "view-profile" ],
+      "5gcatalogue-be" : [ "ROLE_ADMIN", "ROLE_USER" ]
+    },
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
+    "id" : "1f50fd00-93e0-48dd-abc1-bbff30805252",
+    "createdTimestamp" : 1562841931385,
+    "username" : "mogdev",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : true,
+    "firstName" : "Mog",
+    "lastName" : "Dev",
+    "email" : "mog@hack.com",
+    "attributes" : {
+      "tenant_label" : [ "MOG" ],
+      "os_id" : [ "5d2712ff3b9adf636fe4a622" ]
+    },
+    "credentials" : [ {
+      "type" : "password",
+      "hashedSaltedValue" : "YTPgtTG8h32P/FBPZWy+9cEgzTOOkhfeRBGz+0qMQYUSNlX+ocjbmSW1m7YyYamIJEJZ0E5IbbY1o4IxUdPFvg==",
+      "salt" : "qJcOxSvdm/rDR2sdAZAdDA==",
+      "hashIterations" : 27500,
+      "counter" : 0,
+      "algorithm" : "pbkdf2-sha256",
+      "digits" : 0,
+      "period" : 0,
+      "createdDate" : 1562841949108,
+      "config" : { }
+    } ],
+    "disableableCredentialTypes" : [ "password" ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "offline_access", "User", "uma_authorization" ],
+    "clientRoles" : {
+      "account" : [ "manage-account", "view-profile" ],
+      "5gcatalogue-be" : [ "ROLE_ADMIN", "ROLE_USER" ]
+    },
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
+    "id" : "7c286e32-9877-47a8-947c-e7840698974d",
+    "createdTimestamp" : 1551092569954,
+    "username" : "sl1_admin",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : true,
+    "firstName" : "SL1",
+    "lastName" : "Admin",
+    "email" : "sl1_admin@5gcity.com",
+    "attributes" : {
+      "tenant_label" : [ "5GCity_SL1" ],
+      "os_id" : [ "5d2476993b9adf092651abd1" ]
+    },
+    "credentials" : [ {
+      "type" : "password",
+      "hashedSaltedValue" : "X1AVwtEME0SKEZByWzfiuURhQbEzPNW5ZcqiUUoU4lrDEnL2HxewG62asmmx/Kz5+17sNS4vhausCgFYvQ6LeA==",
+      "salt" : "URhdkmMeKYDf4FzsRlTQQg==",
+      "hashIterations" : 27500,
+      "counter" : 0,
+      "algorithm" : "pbkdf2-sha256",
+      "digits" : 0,
+      "period" : 0,
+      "createdDate" : 1551092682243,
+      "config" : { }
+    } ],
+    "disableableCredentialTypes" : [ "password" ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "User" ],
+    "clientRoles" : {
+      "account" : [ "manage-account", "view-profile" ],
+      "5gcatalogue-be" : [ "ROLE_ADMIN", "ROLE_USER" ]
+    },
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
+    "id" : "9c1ee499-fcdb-45d7-80bd-4f2223f9b44e",
+    "createdTimestamp" : 1551092585671,
+    "username" : "sl2_admin",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : true,
+    "firstName" : "SL2",
+    "lastName" : "Admin",
+    "email" : "sl2_admin@5gcity.com",
+    "attributes" : {
+      "tenant_label" : [ "5GCity_SL2" ],
+      "os_id" : [ "5d2476b63b9adf092651abd2" ]
+    },
+    "credentials" : [ {
+      "type" : "password",
+      "hashedSaltedValue" : "XS6oWQnrDmgxybAAon2BRwAFoPu5i9D9rmIYxVGizTyjlas1Y9Xp1RU9hAOrySLYQ7iG+JCU/J/y8L8/SGs2qQ==",
+      "salt" : "m5Tez73GWj+kEInySmR7fA==",
+      "hashIterations" : 27500,
+      "counter" : 0,
+      "algorithm" : "pbkdf2-sha256",
+      "digits" : 0,
+      "period" : 0,
+      "createdDate" : 1551092668592,
+      "config" : { }
+    } ],
+    "disableableCredentialTypes" : [ "password" ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "User" ],
+    "clientRoles" : {
+      "account" : [ "manage-account", "view-profile" ],
+      "5gcatalogue-be" : [ "ROLE_ADMIN", "ROLE_USER" ]
     },
     "notBefore" : 0,
     "groups" : [ ]

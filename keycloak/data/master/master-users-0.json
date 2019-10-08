@@ -9,13 +9,14 @@
     "emailVerified" : false,
     "credentials" : [ {
       "type" : "password",
-      "hashedSaltedValue" : "OC3W6nVUwtwGvToBgfJJfhdo5rHpvQh5VIxSwiuP2agjd4BkgoolKLwA97GvFlXY0ooUPSKHBYfXkofy+5xFHw==",
-      "salt" : "k47/G1AUf2kEyVXq/UqVyg==",
+      "hashedSaltedValue" : "Uc364Lcidkk5no/U7rMfb8vNmE/2M7e47AWOmYfg7CtP+6Sxfm6GTtdYH1+njtc4fz4pJm7aJluckhGeW6GFmw==",
+      "salt" : "Ys7/1to5wekDMDOiPRMzvg==",
       "hashIterations" : 27500,
       "counter" : 0,
       "algorithm" : "pbkdf2-sha256",
       "digits" : 0,
       "period" : 0,
+      "createdDate" : 1551092713864,
       "config" : { }
     } ],
     "disableableCredentialTypes" : [ "password" ],

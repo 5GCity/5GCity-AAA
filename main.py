@@ -1,16 +1,13 @@
 import argparse
 
+from commands.configuration import Configuration
 from commands.docker import DockerBuilder
 from commands.gravitee import GraviteeBuilder
 from commands.keycloak import KeyCloakBuilder
 
-# TODO: Log and catch exceptions
-# TODO: Add gravity export and import functions
-# TODO: Provide function documentation and licensing
-
-
 # === Script Commands ===
 COMMANDS = {
+    'configuration': Configuration,
     'docker': DockerBuilder,
     'keycloak': KeyCloakBuilder,
     'gravitee': GraviteeBuilder

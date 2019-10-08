@@ -6,7 +6,7 @@ from typing import Dict, Any, ClassVar
 
 import requests
 
-from config import ConfReader
+from config import DockerParser
 
 
 @dataclass
@@ -26,10 +26,10 @@ class KeyCloak:
     @classmethod
     def build(cls):
         _args = [
-            ConfReader().get_docker_service('keycloak', 'KEYCLOAK_USER'),
-            ConfReader().get_docker_service('keycloak', 'KEYCLOAK_PASSWORD'),
+            DockerParser().get_docker_service('keycloak', 'KEYCLOAK_USER'),
+            DockerParser().get_docker_service('keycloak', 'KEYCLOAK_PASSWORD'),
             'admin-cli',
-            ConfReader().get_docker_service('keycloak', 'AAA_AUTH_BASE_URL')
+            DockerParser().get_docker_service('keycloak', 'AAA_AUTH_BASE_URL')
         ]
 
         instance = KeyCloak(*_args)

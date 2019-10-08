@@ -1,17 +1,15 @@
 import json
+import re
 import os
 import sys
 from dataclasses import dataclass
+from getpass import getpass
 from typing import ClassVar, Dict
 
 import requests
 from requests.auth import HTTPBasicAuth
 
-from config import ConfReader
-
-
 # TODO: Handle Errors
-# TODO: Documentation
 
 @dataclass
 class Gravitee:
@@ -37,12 +35,7 @@ class Gravitee:
 
     @classmethod
     def build(cls, base_url):
-        arguments = ['username', 'password']
-        _args = []
-        for arg in arguments:
-            _args.append(ConfReader().get('gravitee', arg))
-
-        _args.append(base_url)
+        _args = [input("Gravitee username: "), getpass(prompt="Gravitee password: "), base_url]
 
         instance = Gravitee(*_args)
         for key in instance.ENDPOINTS.keys():
@@ -121,23 +114,44 @@ class Gravitee:
         applications = __subscriptions__()
         __application__()
 
-    def import_api(self, name):
+    def import_api(self, name, dev=False):
+
+        def change_values(data):
+            if not dev:
+                params = re.findall("@.*?@", data)
+                for param in set(params):
+                    if '_ip' in param.lower():
+                        print("\nPlease provide the protocol, e.g., http://192.168.1.1")
+                    val = input(f"{param.replace('@', '')} value: ")
+                    if val.endswith("/"):
+                        val = val[:-1]
+                    data = data.replace(param, val)
+                # Change OAUTH resource server
+                data = data.replace("@SERVER_NAME", input("Server name. Usually the IP address if running on localhost:"))
+            return json.loads(data)
 
         def __api__():
             with open(os.path.join(reading_directory, 'api.json'), 'r') as f:
-                data = json.load(f)
+                data = f.read()
+            data = change_values(data)
             r = requests.post(self.ENDPOINTS['import_api'], auth=self.authentication, json=data)
-            Gravitee.__validate_response__(r)
 
-            return r.json()['id']
+            Gravitee.__validate_response__(r)
+            r = requests.get(self.ENDPOINTS['apis'], params={'name': name}, auth=self.authentication)
+            Gravitee.__validate_response__(r)
+            data = r.json()
+            if not data:
+                raise ValueError("The provided name don't exist")
+            return data[0]['id']
 
         def __application__():
             with open(os.path.join(reading_directory, 'applications.json'), 'r') as f:
                 data = json.load(f)
 
             for app in data:
-                r = requests.post(self.ENDPOINTS['import_applications'], auth=self.authentication, json=app)
-                Gravitee.__validate_response__(r)
+                requests.post(self.ENDPOINTS['import_applications'], auth=self.authentication, json=app)
+                # Ignore response validation
+                # Gravitee.__validate_response__(r)
 
         def __subscriptions__():
             with open(os.path.join(reading_directory, 'subscriptions.json'), 'r') as f:

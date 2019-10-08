@@ -1,8 +1,1 @@
-[
-    {
-        "name": "SliceManager Client",
-        "description": "Client for SliceManager API",
-        "type": "REST API",
-        "clientId": "my_client"
-    }
-]
+[]

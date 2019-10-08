@@ -1,5 +1,5 @@
 from commands import Command
-from config import ConfReader
+from config import DockerParser
 from gravitee import Gravitee
 
 
@@ -14,17 +14,19 @@ class GraviteeBuilder(Command):
         gravitee_group.add_argument('--export_api', help='Fully export the given api name')
         gravitee_group.add_argument('--import_api', help='Fully import the given api name')
 
+        gravitee_parser.add_argument('--dev', help="Import an API with dev annotations", action="store_true")
+
         gravitee_parser.add_argument('--url',
                                      help='The IP address to perform the operation, '
                                           'by default uses the one selected on the docker file. '
                                           'Must contain the protocol the endpoint and the common slash. '
                                           'E.g. http://localhost:8083/management/',
-                                     default=ConfReader().get_docker_service('management_ui', 'MGMT_API_URL'))
+                                     default=None)
 
     @classmethod
     def execute(mcs, args):
         arg, value = super().execute(args)
-        getattr(mcs, arg)(value, args.url)
+        getattr(mcs, arg)(value, args.url, args.dev)
 
     @classmethod
     def export_api(mcs, *args):
@@ -33,5 +35,6 @@ class GraviteeBuilder(Command):
 
     @classmethod
     def import_api(mcs, *args):
-        g = Gravitee.build(args[1])
-        g.import_api(args[0])
+        url_ = DockerParser().get_docker_service('management_ui', 'MGMT_API_URL') if not args[1] else args[1]
+        g = Gravitee.build(url_)
+        g.import_api(args[0], args[2])

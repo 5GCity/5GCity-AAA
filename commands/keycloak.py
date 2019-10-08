@@ -3,11 +3,8 @@ import subprocess
 import sys
 
 from commands import Command
-from config import ConfReader
+from config import DockerParser
 from keycloak import KeyCloak
-
-
-# TODO: Documentation
 
 
 class KeyCloakBuilder(Command):
@@ -50,12 +47,12 @@ class KeyCloakBuilder(Command):
         command = (
             "docker run --rm -it -e USER=$USER -e USERID=$UID --name keycloak_exporter --network=aaa_compose_default "
             f"-v {realm_path}:/tmp/export "
-            f"-e DB_DATABASE={ConfReader().get_docker_service('keycloak', 'DB_DATABASE')} "
-            f"-e DB_PASSWORD={ConfReader().get_docker_service('keycloak', 'DB_PASSWORD')} "
-            f"-e DB_USER={ConfReader().get_docker_service('keycloak', 'DB_USER')} "
-            f"-e DB_VENDOR={ConfReader().get_docker_service('keycloak', 'DB_VENDOR')} "
+            f"-e DB_DATABASE={DockerParser().get_docker_service('keycloak', 'DB_DATABASE')} "
+            f"-e DB_PASSWORD={DockerParser().get_docker_service('keycloak', 'DB_PASSWORD')} "
+            f"-e DB_USER={DockerParser().get_docker_service('keycloak', 'DB_USER')} "
+            f"-e DB_VENDOR={DockerParser().get_docker_service('keycloak', 'DB_VENDOR')} "
             f"-e DB_ADDR={postgres.attrs['NetworkSettings']['Networks']['aaa_compose_default']['IPAddress']} "
-            f"-e DB_PORT={ConfReader().get_docker_service('keycloak', 'DB_PORT')} "
+            f"-e DB_PORT={DockerParser().get_docker_service('keycloak', 'DB_PORT')} "
             "jboss/keycloak "
             f"-Dkeycloak.migration.realmName={realm_name} "
             "-Dkeycloak.migration.provider=dir "

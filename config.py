@@ -1,10 +1,12 @@
 import configparser
-from ast import literal_eval as le
+import os
 
 import yaml
-from importlib_resources import read_text
 
-import etc
+try:
+    from yaml import CLoader as Loader, CDumper as Dumper
+except ImportError:
+    from yaml import Loader, Dumper
 
 
 class Singleton(type):
@@ -20,33 +22,45 @@ class Singleton(type):
         return cls._instances[cls]
 
 
-class ConfReader(metaclass=Singleton):
+class DockerParser(metaclass=Singleton):
     """
-    Read configuration from the ini file
-    The class uses the ini_file input to read external or default file
+    Helper class to parse the docker compose yaml.
+    This class only parses the generated file from
+    the configuration command.
     """
-
     def __init__(self):
         self.parser = configparser.ConfigParser(allow_no_value=True)
-        self.parser.read_string(read_text(etc, 'conf.ini'))
-
-        self.docker_parse = yaml.load(open('aaa_compose/compose-aaa.yml'))
-
-    def get(self, section, config):
-        return le(self.parser.get(section, config))
-
-    def get_list(self, section, config):
-        return self.parser.get(section, config).split(',')
-
-    def get_section_dict(self, section):
-        configs_list = self.parser.items(section, raw=True) if section in self.parser else None
-        configs = dict()
-        for key, value in configs_list:
-            configs[key] = self.get(section, key)
-        return configs
+        self.docker_parse = YamlLoader.load('aaa_compose/compose-aaa.yml')
 
     def get_docker_service(self, service, config, section='environment'):
         for arg in self.docker_parse['services'][service][section]:
             if config in arg:
                 return arg.split("=")[1]
         return None
+
+
+class YamlLoader:
+    """
+    Class to handle the YAML operations.
+    """
+
+    @staticmethod
+    def load(name):
+        """
+        Loads a YAML file.
+        :param name: file's path
+        :return: YAML file in a dict format.
+        """
+        if not os.path.isfile(name):
+            raise ValueError(f"File {name} does not exists.")
+        return yaml.load(open(name), Loader=yaml.Loader)
+
+    @staticmethod
+    def save(data, name):
+        """
+        Saves a dict in a yaml file format.
+        :param data: Dict data to store on the file
+        :param name: Name of the file to save.
+        """
+        with open(name, 'w') as file:
+            yaml.dump(data, file, Dumper=Dumper)
