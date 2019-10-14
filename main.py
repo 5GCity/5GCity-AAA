@@ -1,4 +1,5 @@
 import argparse
+import sys
 
 from commands.configuration import Configuration
 from commands.docker import DockerBuilder
@@ -30,7 +31,10 @@ def get_args():
     args = parser.parse_args()
     command = args.command
     del args.command
-    COMMANDS[command].execute(args)
+    try:
+        COMMANDS[command].execute(args)
+    except KeyboardInterrupt:
+        sys.exit()
 
 
 if __name__ == '__main__':

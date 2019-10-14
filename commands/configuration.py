@@ -1,10 +1,12 @@
 import os
+import subprocess
 import sys
 from getpass import getpass
 
 import bcrypt
 
 from commands import Command
+from commands.docker import DockerBuilder
 from config import YamlLoader
 
 
@@ -17,17 +19,18 @@ class Configuration(Command):
 
     @classmethod
     def execute(mcs, args):
-        # TODO: Add dashboard server configuration on nginx
         base = YamlLoader.load(f'{mcs.COMPOSE_DIR}/compose-aaa-base.yml')
         mcs.common_config(base)
         mcs.nginx(base)
         mcs.gravitee(base)
         YamlLoader.save(base, f'{mcs.COMPOSE_DIR}/compose-aaa.yml')
+        # Ensure Compose ENVs are enforced
+        subprocess.run(DockerBuilder.COMMAND_MAPPER["start"].split(' '))
 
     @classmethod
     def common_config(mcs, base):
         parameters = {
-            "SERVER_NAME": "Insert the server name to be used."
+            "SERVER_NAME": "Insert the server name to be used without the http protocol."
                            "E.g. IP: 192.168.1.1 or FQDN: 5g-dashboard.i2cat.net: "
         }
 
@@ -39,9 +42,9 @@ class Configuration(Command):
 
     @classmethod
     def dashboard_config(mcs, base):
-        dash_path = input("Insert the Dashboard's full path, e.g. /home/5GCITY/dev/5GCity-Dashboard-new ")
-        if not dash_path.endswith("/"):
-            dash_path = dash_path + "/"
+        dash_path = input("Insert the Dashboard's full path (e.g. /home/5GCITY/dev/5GCity-Dashboard-new): ")
+        if dash_path.endswith("/"):
+            dash_path = dash_path[:-1]
 
         # Validate the folder
         if not os.path.exists(dash_path):
@@ -52,7 +55,7 @@ class Configuration(Command):
         dockerfile = os.path.join(dash_path, "Dockerfile")
         keycloak_json = os.path.join(dash_path, "public", "keycloak_base.json")
         if not os.path.exists(dockerfile) or not os.path.exists(keycloak_json):
-            sys.exit("Dockerfile or public/keycloak.json are missing don't exist.")
+            sys.exit("Dockerfile or public/keycloak_base.json are missing don't exist.")
 
         with open(keycloak_json, "r") as file:
             kj = file.read()
@@ -66,6 +69,10 @@ class Configuration(Command):
         for enum, _ in enumerate(base["services"]["dashboard"]["build"]["args"]):
             base["services"]["dashboard"]["build"]["args"][enum] = base["services"]["dashboard"]["build"]["args"][
                 enum].replace("SERVER_NAME", mcs.VALUES["SERVER_NAME"], 1)
+
+        for enum, _ in enumerate(base["services"]["dashboard"]["volumes"]):
+            base["services"]["dashboard"]["volumes"][enum] = base["services"]["dashboard"]["volumes"][enum].replace(
+                "DASH_PATH", dash_path)
 
     @classmethod
     def gravitee(mcs, base):

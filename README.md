@@ -19,7 +19,7 @@ import and export tools.
 
 ### Requirements
 
-AAA current installation uses a single virtual machine with 1 vCPU and 3 GB of RAM. It's not recommended less than these
+AAA current installation uses a single virtual machine with 2 vCPU and 8 GB of RAM. It's not recommended less than these
 requirements.
 
 ### Installation
@@ -117,28 +117,15 @@ Install pipenv dependencies:
 
 ### Configuration
 
-Currently the configuration is hold in two files:
- 
- * etc/conf.ini - File that is used by the python script to perform the import and export both realms and APIs.
- * aaa_compose/compose-aaa.yml - File that is used by docker to mount the environment that will run the solution.
+Currently the configuration is hold in one files:
+
+ * aaa_compose/compose-aaa-base.yml - File that is used by docker to mount the environment that will run the solution.
 
 
-#### conf.ini
-
-Within the conf.ini file there is a single configuration section, gravitee.
-
-
-##### Gravitee
-
-The gravitee section contains Gravitee Management API access information
-
-* username - Gravitee admin username
-* password - Gravitee admin password
-
-#### compose-aaa.yml
+#### compose-aaa-base.yml
 
 This file is a regular docker compose file in yml format containing all needed software configurations to run the AAA
-environment, containing three sections "Auxiliary Services",  "GRAVITEE Services" and "Keycloak Services".
+environment, containing the Dashboard and three sections: "Auxiliary Services",  "GRAVITEE Services" and "Keycloak Services".
 
 ##### Auxiliary Services
 
@@ -168,37 +155,13 @@ https://docs.gravitee.io/apim_overview_introduction.html
 
 Information about configuration can be found on keycloak docker page https://hub.docker.com/r/jboss/keycloak/ 
 
-#### Port Mapping
-
-| Service             | Port          | Network
-| -------------       | ------------- | ------------- | 
-| MongoDB             | 27017         | Docker        |
-| MongoDB             | 27017         | Host          |
-| ElasticSearch       | 9200          | Docker        |
-| ElasticSearch       | 9200          | Host          |
-| POSTGRES            | 5432          | Docker        |
-| Gravitee GW         | 8000          | Host          |
-| Gravitee Management | 8083          | Host          |
-| Gravitee UI         | 80            | Docker        |
-| Gravitee UI         | 8092          | Host          |
-| keycloak            | 8080          | Host          |
-| keycloack           | 8080          | Docker        |
-
-
-#### User Mapping
-
-| Service       | Username      | Password      |
-| ------------- | ------------- | ------------- | 
-| Gravitee      | admin         | admin         |
-| Keycloak      | admin         | admin         |
-| 5GCity        | admin         | admin         |
-
 
 ### Execution
 
-To execute the ecosystem the main.py must be used. Currently it accepts three commands,
-(i) docker, related the ecosystem management, start and stop, (ii) keycloak related to the authentication solution and
- (iii) gravitee to manage the authorization and audit. Both keycloak and Gravitee commands are used to to import and
+To execute the ecosystem the main.py must be used. Currently it accepts four commands,
+(i) docker, related the ecosystem management, start and stop, (ii) keycloak related to the authentication solution,
+ (iii) gravitee to manage the authorization and audit and (iv) configuration, which configures the needed information
+ to run both Dashboard and the AAA using an NGINX as a proxy. Both keycloak and Gravitee commands are used to to import and
  export environments.
 
 Within the project folder activate the python environment, **Note that the following commands must run within the
@@ -213,17 +176,27 @@ Check script usage
 ```
 $ python main.py -h
 
-usage: main.py [-h] {docker,keycloak,gravitee} ...
+usage: main.py [-h] {configuration,docker,keycloak,gravitee} ...
 
 Script to manage 5G City AAA
 
 positional arguments:
-  {docker,keycloak,gravitee}
+  {configuration,docker,keycloak,gravitee}
 
 optional arguments:
-  -h, --help         show this help message and exit
+  -h, --help            show this help message and exit
 
 ```
+
+To configure the AAA
+
+```
+$ python main.py configuration
+```
+
+This command will ask for a series of user inputs that will automatically configure the Dashboard and the NGINX for
+AAA usage.
+
 
 To start docker environment
 
@@ -231,13 +204,11 @@ To start docker environment
 $ python main.py docker --start
 ```
 
-Once a message similar to **"Admin console listening on http://127.0.0.1:9990"** means the environment has started.
-
 
 To import keycloak realm
 
 ```
-$ python main.py keycloak --import_realm 5gcity
+$ python main.py keycloak --import_realm master
 ```
 
 Once the keycloak stars the admin console, message similar to **"Admin console listening on http://127.0.0.1:9990" the
@@ -248,7 +219,7 @@ By default keycloak uses https in order to disable it the user must import the p
 disabled.
 
 ```
-$ python main.py keycloak --import_realm master
+$ python main.py keycloak --import_realm 5gcity
 ```
 
 
@@ -257,6 +228,8 @@ To import Gravitee API
 ```
 $ python main.py gravitee --import_api "Slice Manager API"
 ```
+
+This command will trigger a set of user inputs in order to configure the API to be imported.
 
 If no message is displayed everything worked as expected.
 
@@ -276,5 +249,6 @@ created the administrator must edit the user on the section attributes and add t
 | ------------- | ----------------------------------------- |
 | os_id         | The user_id generated by SliceManager API |
 | tenant_label  | The username on the SliceManager API      |
+| access_level  | The user's level of access on the SDK     |
 
 The administrator can also set the credentials for the new user.
