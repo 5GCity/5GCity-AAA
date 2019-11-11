@@ -27,7 +27,7 @@
                 "groovy": {
                     "onRequestScript": "",
                     "onResponseScript": "",
-                    "onResponseContentScript": "import groovy.json.JsonSlurper\nimport io.gravitee.policy.groovy.PolicyResult.State\n\ndef jsonSlurper = new JsonSlurper();\n\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload'])\ndef user_id = auth_content.os_id\n\ndef user_roles = auth_content.realm_access.roles\n\nif (!user_roles.contains('User')) {\n\n    result.state = State.FAILURE\n    result.code = 403\n\n}\n\n\nif (!user_roles.contains('Administrator') && user_roles.contains('User')) {\n    // List Tenant Related\n    // Users and not admins can only search for owned resource\n    def jsonSlurper2 = new JsonSlurper()\n    def content = jsonSlurper2.parseText(response.content)\n\n    if(content.user_id != user_id){\n        result.state = State.FAILURE\n        result.code = 403\n    }\n}\n\nreturn response.content"
+                    "onResponseContentScript": "import groovy.json.JsonSlurper\nimport io.gravitee.policy.groovy.PolicyResult.State\n\ndef jsonSlurper = new JsonSlurper();\n\nif (response.status == 500) {\n    def content = jsonSlurper.parseText(\"{}\")\n    return JsonOutput.toJson(content)\n}\n\n\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload'])\ndef user_id = auth_content.os_id\n\ndef user_roles = auth_content.realm_access.roles\n\nif (!user_roles.contains('User')) {\n\n    result.state = State.FAILURE\n    result.code = 403\n\n}\n\n\nif (!user_roles.contains('Administrator') && user_roles.contains('User')) {\n    // List Tenant Related\n    // Users and not admins can only search for owned resource\n    def jsonSlurper2 = new JsonSlurper()\n    def content = jsonSlurper2.parseText(response.content)\n\n    if(content.user_id != user_id){\n        result.state = State.FAILURE\n        result.code = 403\n    }\n}\n\nreturn response.content"
                 },
                 "description": "Description of the Groovy Gravitee Policy",
                 "enabled": true
@@ -50,7 +50,7 @@
                 ],
                 "groovy": {
                     "onRequestScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport io.gravitee.policy.api.PolicyChain;\nimport groovy.json.JsonSlurper\nimport groovy.json.JsonOutput\n\ndef jsonSlurper = new JsonSlurper();\n\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef username = auth_content.tenant;\ndef user_id = auth_content.os_id;\n\ndef user_roles = auth_content.realm_access.roles\n\nif(!user_roles.contains('User')){\n\n  \tresult.state = State.FAILURE;\n    result.code = 403;\n\n}\n\n\nif(!user_roles.contains('Administrator') && user_roles.contains('User')){\n\t// List Tenant Related\n\t// Users and not admins can only search for owned resource\n\trequest.parameters().clear();\n\trequest.parameters().put('user_id', Collections.singletonList(user_id));\n}\n\n",
-                    "onResponseContentScript": "import groovy.json.JsonOutput\nimport groovy.json.JsonSlurper\n\ndef jsonSlurper = new JsonSlurper()\ndef content = jsonSlurper.parseText(response.content)\n\ndef jsonSlurper2 = new JsonSlurper()\nusers = jsonSlurper2.parseText(new URL(\"@SM_IP_PORT@/api/v0.1/user\").text)\n\ndef tenantMap = [:]\nusers.each { tenantMap[it.id] = it.name }\n\nif (content instanceof List || content instanceof Collection ){\n  content.each{ it.tenant_name = tenantMap[it.user_id] } \n} else {\n  content.tenant_name = tenantMap[content.user_id]\n}\n\nreturn JsonOutput.toJson(content)"
+                    "onResponseContentScript": "import groovy.json.JsonOutput\nimport groovy.json.JsonSlurper\n\ndef jsonSlurper = new JsonSlurper()\n\nif (response.status == 500) {\n    def content = jsonSlurper.parseText(\"{}\")\n    return JsonOutput.toJson(content)\n}\n\n\ndef content = jsonSlurper.parseText(response.content)\n\ndef jsonSlurper2 = new JsonSlurper()\nusers = jsonSlurper2.parseText(new URL(\"@SM_IP_PORT@/api/v0.1/user\").text)\n\ndef tenantMap = [:]\nusers.each { tenantMap[it.id] = it.name }\n\nif (content instanceof List || content instanceof Collection ){\n  content.each{ it.tenant_name = tenantMap[it.user_id] } \n} else {\n  content.tenant_name = tenantMap[content.user_id]\n}\n\nreturn JsonOutput.toJson(content)"
                 },
                 "description": "Description of the Groovy Gravitee Policy",
                 "enabled": true
@@ -109,7 +109,7 @@
                     "GET"
                 ],
                 "groovy": {
-                    "onResponseContentScript": "import groovy.json.JsonOutput\nimport groovy.json.JsonSlurper\n\ndef jsonSlurper = new JsonSlurper()\ndef content = jsonSlurper.parseText(response.content)\n\ndef boxes = content.boxes\nboxes.each {\n\n  def location = it.location\n  location.info = \"\"\n\n  if(location.latitude > 100 || location.longitude > 100){\n    location.latitude = 51.447827\n    location.longitude = -2.598014\n    location.info = \"\"\n  }\n\n}\n\nreturn JsonOutput.toJson(content)"
+                    "onResponseContentScript": "import groovy.json.JsonOutput\nimport groovy.json.JsonSlurper\n\ndef jsonSlurper = new JsonSlurper()\n\nif (response.status == 500) {\n    def content = jsonSlurper.parseText(\"{}\")\n    return JsonOutput.toJson(content)\n}\n\n\ndef content = jsonSlurper.parseText(response.content)\n\ndef boxes = content.boxes\nboxes.each {\n\n  def location = it.location\n  location.info = \"\"\n\n  if(location.latitude > 100 || location.longitude > 100){\n    location.latitude = 51.447827\n    location.longitude = -2.598014\n    location.info = \"\"\n  }\n\n}\n\nreturn JsonOutput.toJson(content)"
                 },
                 "description": "Description of the Groovy Gravitee Policy",
                 "enabled": true
@@ -135,7 +135,7 @@
                     "GET"
                 ],
                 "groovy": {
-                    "onResponseContentScript": "import groovy.json.JsonOutput\nimport groovy.json.JsonSlurper\n\ndef jsonSlurper = new JsonSlurper()\n\ndef content = jsonSlurper.parseText(response.content)\n\ncontent.each {\n    it.remove('user_id')\n}\n\nreturn JsonOutput.toJson(content"
+                    "onResponseContentScript": "import groovy.json.JsonOutput\nimport groovy.json.JsonSlurper\n\ndef jsonSlurper = new JsonSlurper()\n\nif (response.status == 500) {\n    def content = jsonSlurper.parseText(\"{}\")\n    return JsonOutput.toJson(content)\n}\n\n\ndef content = jsonSlurper.parseText(response.content)\n\ncontent.each {\n    it.remove('user_id')\n}\n\nreturn JsonOutput.toJson(content"
                 },
                 "description": "Description of the Groovy Gravitee Policy",
                 "enabled": true
@@ -151,25 +151,14 @@
                 "enabled": true
             }
         ],
-        "/ran_infrastructure/:ran_infrastructure_id": [
-            {
-                "methods": [
-                    "GET"
-                ],
-                "groovy": {
-                    "onResponseContentScript": "import groovy.json.JsonOutput\nimport groovy.json.JsonSlurper\n\ndef jsonSlurper = new JsonSlurper()\n\ndef content = jsonSlurper.parseText(response.content)\n\ncontent.each {\n    it.remove('user_id')\n}\n\nreturn JsonOutput.toJson(content)"
-                },
-                "description": "Description of the Groovy Gravitee Policy",
-                "enabled": true
-            }
-        ],
+        "/ran_infrastructure/:ran_infrastructure_id": [],
         "/ran_infrastructure": [
             {
                 "methods": [
                     "GET"
                 ],
                 "groovy": {
-                    "onResponseContentScript": "import groovy.json.JsonOutput\nimport groovy.json.JsonSlurper\n\ndef jsonSlurper = new JsonSlurper()\n\ndef content = jsonSlurper.parseText(response.content)\n\ncontent.each {\n    it.remove('user_id')\n}\nreturn JsonOutput.toJson(content)"
+                    "onResponseContentScript": "import groovy.json.JsonOutput\nimport groovy.json.JsonSlurper\n\ndef jsonSlurper = new JsonSlurper()\n\nif (response.status == 500) {\n    def content = jsonSlurper.parseText(\"{}\")\n    return JsonOutput.toJson(content)\n}\n\n\ndef content = jsonSlurper.parseText(response.content)\n\ncontent.each {\n    it.remove('user_id')\n}\nreturn JsonOutput.toJson(content)"
                 },
                 "description": "Description of the Groovy Gravitee Policy",
                 "enabled": true
@@ -224,7 +213,7 @@
                     "GET"
                 ],
                 "groovy": {
-                    "onResponseContentScript": "import groovy.json.JsonOutput\nimport groovy.json.JsonSlurper\n\ndef jsonSlurper = new JsonSlurper()\n\ndef content = jsonSlurper.parseText(response.content)\n\ncontent.each {\n   it.remove('user_id')\n  def temp = it.physical_network_data\n  temp.remove(\"auth_url\")\n  temp.remove(\"domain_name\")\n  temp.remove(\"password\")\n  temp.remove(\"project_name\")\n  temp.remove(\"username\")\n  \n}\n\nreturn JsonOutput.toJson(content)",
+                    "onResponseContentScript": "import groovy.json.JsonOutput\nimport groovy.json.JsonSlurper\n\ndef jsonSlurper = new JsonSlurper()\n\nif (response.status == 500) {\n    def content = jsonSlurper.parseText(\"{}\")\n    return JsonOutput.toJson(content)\n}\n\n\ndef content = jsonSlurper.parseText(response.content)\n\ncontent.each {\n   it.remove('user_id')\n  def temp = it.physical_network_data\n  //temp.remove(\"auth_url\")\n  //temp.remove(\"domain_name\")\n  temp.remove(\"password\")\n  //temp.remove(\"project_name\")\n  temp.remove(\"username\")\n  \n}\n\nreturn JsonOutput.toJson(content)",
                     "onRequestScript": ""
                 },
                 "description": "Description of the Groovy Gravitee Policy",
@@ -370,7 +359,7 @@
                     "GET"
                 ],
                 "groovy": {
-                    "onResponseContentScript": "import groovy.json.JsonOutput\nimport groovy.json.JsonSlurper\n\ndef jsonSlurper = new JsonSlurper()\n\ndef content = jsonSlurper.parseText(response.content)\n\ncontent.each {\n  it.remove('user_id')\n  def temp = it.compute_data\n  temp.remove(\"auth_url\")\n  temp.remove(\"password\")\n  temp.remove(\"username\")\n  temp.remove(\"project_name\")\n  temp.remove(\"domain_name\")\n}\nreturn JsonOutput.toJson(content)"
+                    "onResponseContentScript": "import groovy.json.JsonOutput\nimport groovy.json.JsonSlurper\n\ndef jsonSlurper = new JsonSlurper()\n\nif (response.status == 500) {\n    def content = jsonSlurper.parseText(\"{}\")\n    return JsonOutput.toJson(content)\n}\n\n\ndef content = jsonSlurper.parseText(response.content)\n\ncontent.each {\n  it.remove('user_id')\n  def temp = it.compute_data\n  temp.remove(\"password\")\n  temp.remove(\"username\")\n  temp.remove(\"project_name\")\n  temp.remove(\"domain_name\")\n}\nreturn JsonOutput.toJson(content)"
                 },
                 "description": "Description of the Groovy Gravitee Policy",
                 "enabled": true
@@ -413,7 +402,7 @@
     "pages": [],
     "plans": [
         {
-            "id": "927e6eea-d903-4a6e-be6e-ead903ba6e54",
+            "id": "b38a959a-1a59-4351-8a95-9a1a59635161",
             "name": "Oauth2",
             "description": "Plan using Oauth2",
             "validation": "MANUAL",
@@ -422,12 +411,12 @@
             "type": "API",
             "status": "PUBLISHED",
             "apis": [
-                "f1a41c76-d06d-42dc-a41c-76d06d02dc7b"
+                "deaadfa1-42bd-4b0a-aadf-a142bdbb0a73"
             ],
             "order": 0,
             "characteristics": [],
-            "created_at": 1570025776015,
-            "updated_at": 1570025776015,
+            "created_at": 1573483429925,
+            "updated_at": 1573483429925,
             "paths": {
                 "/": []
             },
@@ -440,21 +429,21 @@
         "/network_service/:network_service_id",
         "/virtual_wifi_access_point",
         "/openstack_vlan/:openstack_vlan_id",
-        "/sdn_wifi_access_point/:sdn_wifi_access_point_id",
         "/virtual_wifi_access_point/:virtual_wifi_access_point_id",
+        "/sdn_wifi_access_point/:sdn_wifi_access_point_id",
         "/openstack_project",
         "/openstack_project/:openstack_project_id",
-        "/",
         "/user/:user_id",
+        "/",
         "/physical_network",
         "/compute",
-        "/user",
         "/openstack_vlan",
-        "/sdn_wifi_access_point",
+        "/user",
         "/physical_network/:physical_network_id",
+        "/sdn_wifi_access_point",
         "/compute/:compute_id",
-        "/network_service",
-        "/network_service_instance/:network_service_instance_id"
+        "/network_service_instance/:network_service_instance_id",
+        "/network_service"
     ],
     "proxy": {
         "context_path": "/slicemanagerapi",

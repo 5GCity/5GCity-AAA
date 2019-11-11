@@ -1,6 +1,6 @@
 import json
-import re
 import os
+import re
 import sys
 from dataclasses import dataclass
 from getpass import getpass
@@ -8,6 +8,7 @@ from typing import ClassVar, Dict
 
 import requests
 from requests.auth import HTTPBasicAuth
+
 
 # TODO: Handle Errors
 
@@ -126,8 +127,6 @@ class Gravitee:
                     if val.endswith("/"):
                         val = val[:-1]
                     data = data.replace(param, val)
-                # Change OAUTH resource server
-                data = data.replace("@SERVER_NAME", input("Server name. Usually the IP address if running on localhost:"))
             return json.loads(data)
 
         def __api__():

@@ -30,7 +30,8 @@ class GraviteeBuilder(Command):
 
     @classmethod
     def export_api(mcs, *args):
-        g = Gravitee.build(args[1])
+        url_ = DockerParser().get_docker_service('management_ui', 'MGMT_API_URL') if not args[1] else args[1]
+        g = Gravitee.build(url_)
         g.export_api(args[0])
 
     @classmethod
