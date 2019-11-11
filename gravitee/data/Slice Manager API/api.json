@@ -203,7 +203,7 @@
                 ],
                 "groovy": {
                     "onRequestScript": "",
-                    "onRequestContentScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport io.gravitee.policy.api.PolicyChain;\nimport groovy.json.JsonSlurper\nimport groovy.json.JsonOutput\n\ndef jsonSlurper = new JsonSlurper();\n\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef username = auth_content.tenant_label;\ndef user_id = auth_content.os_id;\n\ndef user_roles = auth_content.realm_access.roles\n\n// Only admins can create computes\nif(!user_roles.contains('Administrator')){\n\tresult.state = State.FAILURE;\n    result.code = 403;\n}\n\ndef request_content = jsonSlurper.parseText(request.content);\nif (!request_content){\n\tprintln \"Invalid request\";\n\tresult.state = State.FAILURE;\n    result.code = 400;\n}\n\n// Add physical network data\nif(!request_content.containsKey(\"physical_network_data\")){\n  request_content.physical_network_data = [:]\n}\n\nrequest_content.physical_network_data.auth_url = \"@COMPUTE_AUTH_URL@\";\nrequest_content.physical_network_data.domain_name = \"@COMPUTE_DOMAIN_NAME@\";\nrequest_content.physical_network_data.password = \"@COMPUTE_PASSWORD@\";\nrequest_content.physical_network_data.project_name = \"@COMPUTE_PROJECT_NAME@\";\nrequest_content.physical_network_data.username = \"@COMPUTE_USERNAME@\";\nrequest_content.neutron_phy_net_name=\"@neutron_phy_net_name@\"\n\n// Add user information\nrequest_content.user_id = user_id;\n//request_content.name = username;\n\nreturn JsonOutput.toJson(request_content);"
+                    "onRequestContentScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport io.gravitee.policy.api.PolicyChain;\nimport groovy.json.JsonSlurper\nimport groovy.json.JsonOutput\n\ndef jsonSlurper = new JsonSlurper();\n\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef username = auth_content.tenant_label;\ndef user_id = auth_content.os_id;\n\ndef user_roles = auth_content.realm_access.roles\n\n// Only admins can create computes\nif(!user_roles.contains('Administrator')){\n\tresult.state = State.FAILURE;\n    result.code = 403;\n}\n\ndef request_content = jsonSlurper.parseText(request.content);\nif (!request_content){\n\tprintln \"Invalid request\";\n\tresult.state = State.FAILURE;\n    result.code = 400;\n}\n\n// Add physical network data\nif(!request_content.containsKey(\"physical_network_data\")){\n  request_content.physical_network_data = [:]\n}\n\nrequest_content.physical_network_data.auth_url = \"@COMPUTE_AUTH_URL@\";\nrequest_content.physical_network_data.domain_name = \"@COMPUTE_DOMAIN_NAME@\";\nrequest_content.physical_network_data.password = \"@COMPUTE_PASSWORD@\";\nrequest_content.physical_network_data.project_name = \"@COMPUTE_PROJECT_NAME@\";\nrequest_content.physical_network_data.username = \"@COMPUTE_USERNAME@\";\nrequest_content.physical_network_data.neutron_phy_net_name=\"@neutron_phy_net_name@\"\n\n// Add user information\nrequest_content.user_id = user_id;\n//request_content.name = username;\n\nreturn JsonOutput.toJson(request_content);"
                 },
                 "description": "Description of the Groovy Gravitee Policy",
                 "enabled": true
@@ -429,21 +429,21 @@
         "/network_service/:network_service_id",
         "/virtual_wifi_access_point",
         "/openstack_vlan/:openstack_vlan_id",
-        "/sdn_wifi_access_point/:sdn_wifi_access_point_id",
         "/virtual_wifi_access_point/:virtual_wifi_access_point_id",
+        "/sdn_wifi_access_point/:sdn_wifi_access_point_id",
         "/openstack_project",
         "/openstack_project/:openstack_project_id",
-        "/",
         "/user/:user_id",
+        "/",
         "/physical_network",
         "/compute",
-        "/user",
         "/openstack_vlan",
-        "/sdn_wifi_access_point",
+        "/user",
         "/physical_network/:physical_network_id",
+        "/sdn_wifi_access_point",
         "/compute/:compute_id",
-        "/network_service",
-        "/network_service_instance/:network_service_instance_id"
+        "/network_service_instance/:network_service_instance_id",
+        "/network_service"
     ],
     "proxy": {
         "context_path": "/slicemanagerapi",
