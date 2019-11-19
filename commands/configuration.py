@@ -30,8 +30,8 @@ class Configuration(Command):
     @classmethod
     def common_config(mcs, base):
         parameters = {
-            "SERVER_NAME": "Insert the server name to be used without the http protocol."
-                           "E.g. IP: 192.168.1.1 or FQDN: 5g-dashboard.i2cat.net: "
+            "SERVER_NAME": "Insert the server name to be used with the http protocol."
+                           "E.g. IP: http://192.168.1.1 or FQDN: http://5g-dashboard.i2cat.net: "
         }
 
         for key, value in parameters.items():
@@ -59,9 +59,8 @@ class Configuration(Command):
 
         with open(keycloak_json, "r") as file:
             kj = file.read()
-            kj = kj.replace("<AUTH_SERVER_URL>", f"http://{mcs.VALUES['SERVER_NAME']}/auth")
-
         with open(os.path.join(dash_path, "public", "keycloak.json"), "w") as file:
+            kj = kj.replace("<AUTH_SERVER_URL>", f"{mcs.VALUES['SERVER_NAME']}/auth")
             file.write(kj)
 
         base["services"]["dashboard"]["build"]["context"] = dash_path
@@ -137,7 +136,8 @@ class Configuration(Command):
         with open(config_folder + "nginx_base.conf", "r") as file:
             conf = file.read()
 
-            conf = conf.replace(f"@SERVER_NAME", mcs.VALUES["SERVER_NAME"])
+            value = mcs.VALUES["SERVER_NAME"].split("//")[1]
+            conf = conf.replace(f"@SERVER_NAME", value)
 
         with open(config_folder + 'nginx.conf', "w") as file:
             file.write(conf)
