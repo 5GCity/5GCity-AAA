@@ -12,6 +12,7 @@
     "email" : "5gcityadmin@ubiwhere.com",
     "attributes" : {
       "tenant_label" : [ "Administration" ],
+      "accessLevel" : [ "0" ],
       "os_id" : [ "5d2476763b9adf092651abd0" ]
     },
     "credentials" : [ {
@@ -30,6 +31,7 @@
     "requiredActions" : [ ],
     "realmRoles" : [ "offline_access", "Administrator" ],
     "clientRoles" : {
+      "realm-management" : [ "view-users" ],
       "account" : [ "manage-account", "view-profile" ]
     },
     "notBefore" : 0,
@@ -46,6 +48,7 @@
     "email" : "davide.desirello@rai.it",
     "attributes" : {
       "tenant_label" : [ "UC4RAI" ],
+      "accessLevel" : [ "0" ],
       "os_id" : [ "5d4052033b9adf24583db223" ]
     },
     "credentials" : [ {
@@ -62,114 +65,9 @@
     } ],
     "disableableCredentialTypes" : [ "password" ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "offline_access", "User", "uma_authorization" ],
+    "realmRoles" : [ "offline_access", "User" ],
     "clientRoles" : {
       "account" : [ "manage-account", "view-profile" ]
-    },
-    "notBefore" : 0,
-    "groups" : [ ]
-  }, {
-    "id" : "32617a37-efae-4793-9b14-79ed02b65fa2",
-    "createdTimestamp" : 1562774986353,
-    "username" : "hack_team_1",
-    "enabled" : true,
-    "totp" : false,
-    "emailVerified" : true,
-    "firstName" : "Hack",
-    "lastName" : "Team 1",
-    "email" : "hack_team_1@hack.com",
-    "attributes" : {
-      "tenant_label" : [ "hack_team_1" ],
-      "os_id" : [ "5d260d3f3b9adf636fe4a604" ]
-    },
-    "credentials" : [ {
-      "type" : "password",
-      "hashedSaltedValue" : "GlHS8pcH7pabkfFcI1d/kW8zIiel+xdMmGRgwxIWhCrUKCH++rwdmHtUpeWaCWQkQJDvTb7+dfaM0c+mjcoREQ==",
-      "salt" : "Xf6JVNIKQ1vZPcPA6Ug6pA==",
-      "hashIterations" : 27500,
-      "counter" : 0,
-      "algorithm" : "pbkdf2-sha256",
-      "digits" : 0,
-      "period" : 0,
-      "createdDate" : 1562775070476,
-      "config" : { }
-    } ],
-    "disableableCredentialTypes" : [ "password" ],
-    "requiredActions" : [ ],
-    "realmRoles" : [ "offline_access", "User", "uma_authorization" ],
-    "clientRoles" : {
-      "account" : [ "manage-account", "view-profile" ],
-      "5gcatalogue-be" : [ "ROLE_ADMIN", "ROLE_USER" ]
-    },
-    "notBefore" : 0,
-    "groups" : [ ]
-  }, {
-    "id" : "8e0c1530-dc7b-4d44-a9cd-fd0b96cdad85",
-    "createdTimestamp" : 1562775211876,
-    "username" : "hack_team_2",
-    "enabled" : true,
-    "totp" : false,
-    "emailVerified" : true,
-    "firstName" : "Hack",
-    "lastName" : "Team 2",
-    "email" : "hack_team_2@hack.com",
-    "attributes" : {
-      "tenant_label" : [ "hack_team_2" ],
-      "os_id" : [ "5d260e993b9adf636fe4a605" ]
-    },
-    "credentials" : [ {
-      "type" : "password",
-      "hashedSaltedValue" : "63iTP/w4Prb4iptXGdu9WOUSM0GhDp4r35EmEA35CN0RZIuOwwcxZkPBdl+4cAUnX4eASw5BFAZQDsOPaa3gzQ==",
-      "salt" : "vkmJFumHctugxdmStM8p+Q==",
-      "hashIterations" : 27500,
-      "counter" : 0,
-      "algorithm" : "pbkdf2-sha256",
-      "digits" : 0,
-      "period" : 0,
-      "createdDate" : 1562775331779,
-      "config" : { }
-    } ],
-    "disableableCredentialTypes" : [ "password" ],
-    "requiredActions" : [ ],
-    "realmRoles" : [ "offline_access", "User", "uma_authorization" ],
-    "clientRoles" : {
-      "account" : [ "manage-account", "view-profile" ],
-      "5gcatalogue-be" : [ "ROLE_ADMIN", "ROLE_USER" ]
-    },
-    "notBefore" : 0,
-    "groups" : [ ]
-  }, {
-    "id" : "10f9b1e7-3b4f-480c-b8a2-5afa00596a1e",
-    "createdTimestamp" : 1562775360856,
-    "username" : "hack_team_3",
-    "enabled" : true,
-    "totp" : false,
-    "emailVerified" : true,
-    "firstName" : "Hack",
-    "lastName" : "Team 3",
-    "email" : "hack_team_3@hack.com",
-    "attributes" : {
-      "tenant_label" : [ "hack_team_3" ],
-      "os_id" : [ "5d260f113b9adf636fe4a606" ]
-    },
-    "credentials" : [ {
-      "type" : "password",
-      "hashedSaltedValue" : "abpCMF4nwZ4BJBfUTQd8lWu9T1EYGjrrqmfzRi96MtP0Q/yBJ6KaUapa2zuefF14KsCrhQGVUru2QRDSYGpSHw==",
-      "salt" : "/chkGrvN0cCanLTWFHGj0A==",
-      "hashIterations" : 27500,
-      "counter" : 0,
-      "algorithm" : "pbkdf2-sha256",
-      "digits" : 0,
-      "period" : 0,
-      "createdDate" : 1562775368596,
-      "config" : { }
-    } ],
-    "disableableCredentialTypes" : [ "password" ],
-    "requiredActions" : [ ],
-    "realmRoles" : [ "offline_access", "User", "uma_authorization" ],
-    "clientRoles" : {
-      "account" : [ "manage-account", "view-profile" ],
-      "5gcatalogue-be" : [ "ROLE_ADMIN", "ROLE_USER" ]
     },
     "notBefore" : 0,
     "groups" : [ ]
@@ -185,6 +83,7 @@
     "email" : "mog@hack.com",
     "attributes" : {
       "tenant_label" : [ "MOG" ],
+      "accessLevel" : [ "0" ],
       "os_id" : [ "5d2712ff3b9adf636fe4a622" ]
     },
     "credentials" : [ {
@@ -201,7 +100,7 @@
     } ],
     "disableableCredentialTypes" : [ "password" ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "offline_access", "User", "uma_authorization" ],
+    "realmRoles" : [ "offline_access", "User" ],
     "clientRoles" : {
       "account" : [ "manage-account", "view-profile" ],
       "5gcatalogue-be" : [ "ROLE_ADMIN", "ROLE_USER" ]
@@ -220,6 +119,7 @@
     "email" : "sl1_admin@5gcity.com",
     "attributes" : {
       "tenant_label" : [ "5GCity_SL1" ],
+      "accessLevel" : [ "0" ],
       "os_id" : [ "5d2476993b9adf092651abd1" ]
     },
     "credentials" : [ {
@@ -255,6 +155,7 @@
     "email" : "sl2_admin@5gcity.com",
     "attributes" : {
       "tenant_label" : [ "5GCity_SL2" ],
+      "accessLevel" : [ "0" ],
       "os_id" : [ "5d2476b63b9adf092651abd2" ]
     },
     "credentials" : [ {
