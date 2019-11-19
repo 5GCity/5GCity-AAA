@@ -66,7 +66,18 @@
                 "enabled": true
             }
         ],
-        "/ran_infrastructure/configuredRadioPhys": [],
+        "/ran_infrastructure/configuredRadioPhys": [
+            {
+                "methods": [
+                    "GET"
+                ],
+                "groovy": {
+                    "onResponseContentScript": "import groovy.json.JsonOutput\nimport groovy.json.JsonSlurper\n\ndef jsonSlurper = new JsonSlurper()\n\nif (response.status == 500) {\n    def content = jsonSlurper.parseText(\"{}\")\n    return JsonOutput.toJson(content)\n}\n\n\ndef content = jsonSlurper.parseText(response.content)\n\ncontent.each {\n  it.each{\n    def location = it.location\n    location.info = \"\"\n\n    //location.latitude = location.latitude / 1000000\n    //location.longitude = location.longitude / 1000000\n\n    if(location.latitude > 100 || location.longitude > 100){\n      location.latitude = location.latitude / 1000000\n      location.longitude = location.longitude / 1000000\n      location.info = \"\"\n    }\n  } \t\n}\n\nreturn JsonOutput.toJson(content)"
+                },
+                "description": "Description of the Groovy Gravitee Policy",
+                "enabled": true
+            }
+        ],
         "/ran_infrastructure/:ran_infrastructure_id/chunkete_topology/:physicalInterface/wirelessConfig": [
             {
                 "methods": [
@@ -109,7 +120,7 @@
                     "GET"
                 ],
                 "groovy": {
-                    "onResponseContentScript": "import groovy.json.JsonOutput\nimport groovy.json.JsonSlurper\n\ndef jsonSlurper = new JsonSlurper()\n\nif (response.status == 500) {\n    def content = jsonSlurper.parseText(\"{}\")\n    return JsonOutput.toJson(content)\n}\n\n\ndef content = jsonSlurper.parseText(response.content)\n\ndef boxes = content.boxes\nboxes.each {\n\n  def location = it.location\n  location.info = \"\"\n\n  if(location.latitude > 100 || location.longitude > 100){\n    location.latitude = 51.447827\n    location.longitude = -2.598014\n    location.info = \"\"\n  }\n\n}\n\nreturn JsonOutput.toJson(content)"
+                    "onResponseContentScript": "import groovy.json.JsonOutput\nimport groovy.json.JsonSlurper\n\ndef jsonSlurper = new JsonSlurper()\n\nif (response.status == 500) {\n    def content = jsonSlurper.parseText(\"{}\")\n    return JsonOutput.toJson(content)\n}\n\n\ndef content = jsonSlurper.parseText(response.content)\n\ndef boxes = content.boxes\nboxes.each {\n\n  def location = it.location\n  location.info = \"\"\n\n    if(location.latitude > 100 || location.longitude > 100){\n      location.latitude = location.latitude / 1000000\n      location.longitude = location.longitude / 1000000\n      location.info = \"\"\n    }\n}\n\nreturn JsonOutput.toJson(content)"
                 },
                 "description": "Description of the Groovy Gravitee Policy",
                 "enabled": true
@@ -402,7 +413,7 @@
     "pages": [],
     "plans": [
         {
-            "id": "b38a959a-1a59-4351-8a95-9a1a59635161",
+            "id": "2adc4d9c-400b-491b-9c4d-9c400ba91b85",
             "name": "Oauth2",
             "description": "Plan using Oauth2",
             "validation": "MANUAL",
@@ -411,12 +422,12 @@
             "type": "API",
             "status": "PUBLISHED",
             "apis": [
-                "deaadfa1-42bd-4b0a-aadf-a142bdbb0a73"
+                "88a37a4e-819a-425c-a37a-4e819a825ce1"
             ],
             "order": 0,
             "characteristics": [],
-            "created_at": 1573483429925,
-            "updated_at": 1573483429925,
+            "created_at": 1573813148589,
+            "updated_at": 1573813148589,
             "paths": {
                 "/": []
             },
@@ -429,21 +440,21 @@
         "/network_service/:network_service_id",
         "/virtual_wifi_access_point",
         "/openstack_vlan/:openstack_vlan_id",
-        "/virtual_wifi_access_point/:virtual_wifi_access_point_id",
         "/sdn_wifi_access_point/:sdn_wifi_access_point_id",
+        "/virtual_wifi_access_point/:virtual_wifi_access_point_id",
         "/openstack_project",
         "/openstack_project/:openstack_project_id",
-        "/user/:user_id",
         "/",
+        "/user/:user_id",
         "/physical_network",
         "/compute",
-        "/openstack_vlan",
         "/user",
-        "/physical_network/:physical_network_id",
+        "/openstack_vlan",
         "/sdn_wifi_access_point",
+        "/physical_network/:physical_network_id",
         "/compute/:compute_id",
-        "/network_service_instance/:network_service_instance_id",
-        "/network_service"
+        "/network_service",
+        "/network_service_instance/:network_service_instance_id"
     ],
     "proxy": {
         "context_path": "/slicemanagerapi",
@@ -457,7 +468,7 @@
                 "endpoints": [
                     {
                         "name": "default",
-                        "target": "http://172.16.100.12:8989/api/v0.1",
+                        "target": "@SM_IP@/",
                         "weight": 1,
                         "backup": false,
                         "type": "HTTP",

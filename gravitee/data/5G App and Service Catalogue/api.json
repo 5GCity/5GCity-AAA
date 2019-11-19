@@ -1,0 +1,137 @@
+{
+    "name": "5G App and Service Catalogue",
+    "version": "1.0",
+    "description": "The API of the 5G App and Service Catalogue",
+    "visibility": "PRIVATE",
+    "paths": {
+        "/nsd/v1/ns_descriptors": [
+            {
+                "methods": [
+                    "CONNECT",
+                    "DELETE",
+                    "GET",
+                    "HEAD",
+                    "OPTIONS",
+                    "PATCH",
+                    "POST",
+                    "PUT",
+                    "TRACE"
+                ],
+                "transform-headers": {
+                    "scope": "REQUEST",
+                    "removeHeaders": [],
+                    "addHeaders": [
+                        {
+                            "name": "accept",
+                            "value": "application/json"
+                        }
+                    ]
+                },
+                "description": "Description of the Transform Headers Gravitee Policy",
+                "enabled": true
+            }
+        ],
+        "/": []
+    },
+    "services": {
+        "discovery": {
+            "enabled": false
+        }
+    },
+    "resources": [
+        {
+            "name": "oauth",
+            "type": "oauth2",
+            "enabled": true,
+            "configuration": {
+                "authorizationServerUrl": "@DASH_IP@/auth/realms/5gcity",
+                "introspectionEndpoint": "/protocol/openid-connect/token/introspect",
+                "introspectionEndpointMethod": "POST",
+                "scopeSeparator": " ",
+                "userInfoEndpoint": "/protocol/openid-connect/userinfo",
+                "userInfoEndpointMethod": "GET",
+                "useClientAuthorizationHeader": true,
+                "clientAuthorizationHeaderName": "Authorization",
+                "clientAuthorizationHeaderScheme": "Basic",
+                "tokenIsSuppliedByQueryParam": true,
+                "tokenQueryParamName": "token",
+                "tokenIsSuppliedByHttpHeader": false,
+                "tokenIsSuppliedByFormUrlEncoded": true,
+                "tokenFormUrlEncodedName": "token",
+                "clientId": "my_client",
+                "clientSecret": "348e4121-2a64-4a4c-9cc7-7111b3f25621"
+            }
+        }
+    ],
+    "members": [
+        {
+            "source": "memory",
+            "sourceId": "admin",
+            "role": "PRIMARY_OWNER"
+        }
+    ],
+    "pages": [],
+    "plans": [
+        {
+            "id": "f2f9e105-488b-4dc6-b9e1-05488b1dc6f5",
+            "name": "Oauth2",
+            "description": "Plan using oauth",
+            "validation": "MANUAL",
+            "security": "OAUTH2",
+            "securityDefinition": "{\"extractPayload\":true,\"checkRequiredScopes\":false,\"requiredScopes\":[],\"oauthResource\":\"oauth\"}",
+            "type": "API",
+            "status": "PUBLISHED",
+            "apis": [
+                "4867693a-1423-4f26-a769-3a1423cf261e"
+            ],
+            "order": 0,
+            "characteristics": [],
+            "created_at": 1573813183153,
+            "updated_at": 1573813183153,
+            "paths": {
+                "/": []
+            },
+            "excluded_groups": [],
+            "comment_required": false
+        }
+    ],
+    "path_mappings": [
+        "/nsd/v1/ns_descriptors",
+        "/"
+    ],
+    "proxy": {
+        "context_path": "/appcat",
+        "strip_context_path": false,
+        "groups": [
+            {
+                "name": "default-group",
+                "endpoints": [
+                    {
+                        "name": "default",
+                        "target": "@APPCAT_IP@/",
+                        "weight": 1,
+                        "backup": false,
+                        "type": "HTTP",
+                        "http": {
+                            "connectTimeout": 5000,
+                            "idleTimeout": 60000,
+                            "keepAlive": true,
+                            "readTimeout": 10000,
+                            "pipelining": false,
+                            "maxConcurrentConnections": 100,
+                            "useCompression": true,
+                            "followRedirects": false
+                        },
+                        "ssl": {
+                            "trustAll": true,
+                            "hostnameVerifier": false
+                        }
+                    }
+                ],
+                "load_balancing": {
+                    "type": "ROUND_ROBIN"
+                }
+            }
+        ]
+    }
+}
