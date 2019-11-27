@@ -132,6 +132,25 @@
                     "type": "ROUND_ROBIN"
                 }
             }
-        ]
+        ],
+        "cors": {
+            "enabled": true,
+            "allowCredentials": false,
+            "allowOrigin": [
+                "*"
+            ],
+            "allowHeaders": [
+                "authorization",
+                "content-type"
+            ],
+            "allowMethods": [
+                "DELETE",
+                "POST",
+                "GET",
+                "PATCH"
+            ],
+            "exposeHeaders": [],
+            "maxAge": -1
+        }
     }
 }

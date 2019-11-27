@@ -195,7 +195,8 @@ $ python main.py configuration
 ```
 
 This command will ask for a series of user inputs that will automatically configure the Dashboard and the NGINX for
-AAA usage.
+AAA usage. User must know if ssh will be used and the hostname. It will also ask for the Dashboard folder. When using
+ssl user must provide a private.key and a bundle.crt on the folder aaa_compose/nginx/https/cert.
 
 
 To start docker environment

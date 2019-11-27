@@ -468,7 +468,7 @@
                 "endpoints": [
                     {
                         "name": "default",
-                        "target": "@SM_IP@/",
+                        "target": "@SM_IP_PORT@/api/v0.1",
                         "weight": 1,
                         "backup": false,
                         "type": "HTTP",
