@@ -53,7 +53,7 @@ class KeyCloakBuilder(Command):
             f"-e DB_VENDOR={DockerParser().get_docker_service('keycloak', 'DB_VENDOR')} "
             f"-e DB_ADDR={postgres.attrs['NetworkSettings']['Networks']['aaa_compose_default']['IPAddress']} "
             f"-e DB_PORT={DockerParser().get_docker_service('keycloak', 'DB_PORT')} "
-            "jboss/keycloak "
+            "jboss/keycloak:6.0.1 "
             f"-Dkeycloak.migration.realmName={realm_name} "
             "-Dkeycloak.migration.provider=dir "
             "-Dkeycloak.migration.provider=dir "
