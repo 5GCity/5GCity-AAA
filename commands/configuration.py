@@ -30,8 +30,10 @@ class Configuration(Command):
     @classmethod
     def common_config(mcs, base):
         parameters = {
-            "SERVER_NAME": "Insert the server name to be used with the http protocol."
-                           "E.g. IP: http://192.168.1.1 or FQDN: http://5g-dashboard.i2cat.net: "
+            "SERVER_NAME": "Insert the Dashboard server name to be used with the http protocol."
+                           "E.g. IP: http://192.168.1.1 or FQDN: http://5g-dashboard.i2cat.net: ",
+            "MONITORING_SERVER": "Insert the monitoring server to be used."
+                                 "E.g., http://192.168.1.1 or FQDN: http://monitoring.5gcity.com: "
         }
 
         for key, value in parameters.items():
@@ -66,8 +68,12 @@ class Configuration(Command):
         base["services"]["dashboard"]["build"]["context"] = dash_path
 
         for enum, _ in enumerate(base["services"]["dashboard"]["build"]["args"]):
-            base["services"]["dashboard"]["build"]["args"][enum] = base["services"]["dashboard"]["build"]["args"][
-                enum].replace("SERVER_NAME", mcs.VALUES["SERVER_NAME"], 1)
+            for key in mcs.VALUES.keys():
+
+                if key in base["services"]["dashboard"]["build"]["args"][enum]:
+                    base["services"]["dashboard"]["build"]["args"][enum] = \
+                    base["services"]["dashboard"]["build"]["args"][
+                        enum].replace(key, mcs.VALUES[key], 1)
 
         for enum, _ in enumerate(base["services"]["dashboard"]["volumes"]):
             base["services"]["dashboard"]["volumes"][enum] = base["services"]["dashboard"]["volumes"][enum].replace(
