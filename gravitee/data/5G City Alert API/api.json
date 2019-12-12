@@ -1,0 +1,133 @@
+{
+    "name": "5G City Alert API",
+    "version": "0.0.1",
+    "description": "API that allows to create new Alerts and query them. This API is intended to be connected with 5G City Monitoring system and work alongside it in Push mode.\nSwagger produced based on the example messages in confluence's documentation Monitoring System",
+    "visibility": "PRIVATE",
+    "paths": {
+        "/alert": [],
+        "/": []
+    },
+    "services": {
+        "discovery": {
+            "enabled": false
+        }
+    },
+    "resources": [
+        {
+            "name": "oauth",
+            "type": "oauth2",
+            "enabled": true,
+            "configuration": {
+                "authorizationServerUrl": "@DASH_IP@/auth/realms/5gcity",
+                "introspectionEndpoint": "/protocol/openid-connect/token/introspect",
+                "introspectionEndpointMethod": "POST",
+                "scopeSeparator": "",
+                "userInfoEndpoint": "/protocol/openid-connect/userinfo",
+                "userInfoEndpointMethod": "GET",
+                "useClientAuthorizationHeader": true,
+                "clientAuthorizationHeaderName": "Authorization",
+                "clientAuthorizationHeaderScheme": "Basic",
+                "tokenIsSuppliedByQueryParam": false,
+                "tokenQueryParamName": "token",
+                "tokenIsSuppliedByHttpHeader": false,
+                "tokenIsSuppliedByFormUrlEncoded": true,
+                "tokenFormUrlEncodedName": "token",
+                "clientId": "my_client",
+                "clientSecret": "348e4121-2a64-4a4c-9cc7-7111b3f25621"
+            }
+        }
+    ],
+    "members": [
+        {
+            "source": "memory",
+            "sourceId": "admin",
+            "role": "PRIMARY_OWNER"
+        }
+    ],
+    "pages": [],
+    "plans": [
+        {
+            "id": "bc4d6860-893b-412e-8d68-60893b012ef5",
+            "name": "Oauth2",
+            "description": "Plan using oauth",
+            "validation": "MANUAL",
+            "security": "OAUTH2",
+            "securityDefinition": "{\"extractPayload\":true,\"checkRequiredScopes\":false,\"requiredScopes\":[],\"oauthResource\":\"oauth\"}",
+            "type": "API",
+            "status": "PUBLISHED",
+            "apis": [
+                "0cccc9ce-db7e-43e7-8cc9-cedb7e93e767"
+            ],
+            "order": 1,
+            "characteristics": [],
+            "created_at": 1576091159434,
+            "updated_at": 1576091195189,
+            "published_at": 1576091195189,
+            "paths": {
+                "/": []
+            },
+            "excluded_groups": [],
+            "comment_required": false
+        }
+    ],
+    "path_mappings": [
+        "/alert",
+        "/"
+    ],
+    "proxy": {
+        "context_path": "/5gcityalertapi",
+        "strip_context_path": false,
+        "groups": [
+            {
+                "name": "default-group",
+                "endpoints": [
+                    {
+                        "name": "default",
+                        "target": "@API_IP:PORT@/",
+                        "weight": 1,
+                        "backup": false,
+                        "type": "HTTP",
+                        "http": {
+                            "connectTimeout": 5000,
+                            "idleTimeout": 60000,
+                            "keepAlive": true,
+                            "readTimeout": 10000,
+                            "pipelining": false,
+                            "maxConcurrentConnections": 100,
+                            "useCompression": true,
+                            "followRedirects": false
+                        },
+                        "ssl": {
+                            "trustAll": true,
+                            "hostnameVerifier": false
+                        }
+                    }
+                ],
+                "load_balancing": {
+                    "type": "ROUND_ROBIN"
+                }
+            }
+        ],
+        "cors": {
+            "enabled": true,
+            "allowCredentials": false,
+            "allowOrigin": [
+                "*"
+            ],
+            "allowHeaders": [
+                "authorization",
+                "content-type"
+            ],
+            "allowMethods": [
+                "TRACE",
+                "DELETE",
+                "POST",
+                "GET",
+                "PATCH",
+                "PUT"
+            ],
+            "exposeHeaders": [],
+            "maxAge": -1
+        }
+    }
+}
