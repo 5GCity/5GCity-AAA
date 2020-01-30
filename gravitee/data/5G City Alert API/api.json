@@ -47,7 +47,7 @@
     "pages": [],
     "plans": [
         {
-            "id": "bc4d6860-893b-412e-8d68-60893b012ef5",
+            "id": "80a99550-877b-4f69-a995-50877b6f69b4",
             "name": "Oauth2",
             "description": "Plan using oauth",
             "validation": "MANUAL",
@@ -56,13 +56,12 @@
             "type": "API",
             "status": "PUBLISHED",
             "apis": [
-                "0cccc9ce-db7e-43e7-8cc9-cedb7e93e767"
+                "27a0c31f-522f-4dcf-a0c3-1f522f9dcf98"
             ],
-            "order": 1,
+            "order": 0,
             "characteristics": [],
-            "created_at": 1576091159434,
-            "updated_at": 1576091195189,
-            "published_at": 1576091195189,
+            "created_at": 1580387309143,
+            "updated_at": 1580387309143,
             "paths": {
                 "/": []
             },

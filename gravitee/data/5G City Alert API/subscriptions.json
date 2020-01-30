@@ -1,11 +1,36 @@
 {
-    "data": [],
-    "metadata": {},
+    "data": [
+        {
+            "id": "7ab4f82c-4d59-42c2-b4f8-2c4d5922c2fd",
+            "api": "27a0c31f-522f-4dcf-a0c3-1f522f9dcf98",
+            "plan": "80a99550-877b-4f69-a995-50877b6f69b4",
+            "application": "a174ed27-c955-435a-b4ed-27c955a35a59",
+            "status": "accepted",
+            "processed_at": 1580387370612,
+            "processed_by": "a5929bb8-5c5e-4c20-929b-b85c5e3c2084",
+            "subscribed_by": "a5929bb8-5c5e-4c20-929b-b85c5e3c2084",
+            "starting_at": 1580387370609,
+            "created_at": 1580387370592,
+            "updated_at": 1580387370592,
+            "client_id": "my_client"
+        }
+    ],
+    "metadata": {
+        "a174ed27-c955-435a-b4ed-27c955a35a59": {
+            "name": "5GCity Client"
+        },
+        "27a0c31f-522f-4dcf-a0c3-1f522f9dcf98": {
+            "name": "5G City Alert API"
+        },
+        "80a99550-877b-4f69-a995-50877b6f69b4": {
+            "name": "Oauth2"
+        }
+    },
     "page": {
         "current": 1,
-        "size": 0,
+        "size": 1,
         "per_page": 20,
-        "total_pages": 0,
-        "total_elements": 0
+        "total_pages": 1,
+        "total_elements": 1
     }
 }

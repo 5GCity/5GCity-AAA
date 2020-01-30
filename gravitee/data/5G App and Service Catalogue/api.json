@@ -53,7 +53,7 @@
                 "useClientAuthorizationHeader": true,
                 "clientAuthorizationHeaderName": "Authorization",
                 "clientAuthorizationHeaderScheme": "Basic",
-                "tokenIsSuppliedByQueryParam": true,
+                "tokenIsSuppliedByQueryParam": false,
                 "tokenQueryParamName": "token",
                 "tokenIsSuppliedByHttpHeader": false,
                 "tokenIsSuppliedByFormUrlEncoded": true,
@@ -73,7 +73,7 @@
     "pages": [],
     "plans": [
         {
-            "id": "f2f9e105-488b-4dc6-b9e1-05488b1dc6f5",
+            "id": "d792a0c5-144e-42df-92a0-c5144e92dfae",
             "name": "Oauth2",
             "description": "Plan using oauth",
             "validation": "MANUAL",
@@ -82,12 +82,12 @@
             "type": "API",
             "status": "PUBLISHED",
             "apis": [
-                "4867693a-1423-4f26-a769-3a1423cf261e"
+                "a6e88b9f-9206-43c8-a88b-9f920683c81c"
             ],
             "order": 0,
             "characteristics": [],
-            "created_at": 1573813183153,
-            "updated_at": 1573813183153,
+            "created_at": 1580387550546,
+            "updated_at": 1580387550546,
             "paths": {
                 "/": []
             },
@@ -108,7 +108,7 @@
                 "endpoints": [
                     {
                         "name": "default",
-                        "target": "@APPCAT_IP@/",
+                        "target": "@APPCAT_IP_PORT@/",
                         "weight": 1,
                         "backup": false,
                         "type": "HTTP",

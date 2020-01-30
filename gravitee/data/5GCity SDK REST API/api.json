@@ -431,7 +431,7 @@
     "pages": [],
     "plans": [
         {
-            "id": "23dc76fd-0fdb-490e-9c76-fd0fdb690ed5",
+            "id": "8dac5c59-7ca3-4280-ac5c-597ca31280d3",
             "name": "Oauth2",
             "description": "Plan using Oauth2",
             "validation": "MANUAL",
@@ -440,12 +440,12 @@
             "type": "API",
             "status": "PUBLISHED",
             "apis": [
-                "ef749c72-6235-41b9-b49c-72623581b958"
+                "1afcc39f-6614-43be-bcc3-9f661483bebe"
             ],
             "order": 0,
             "characteristics": [],
-            "created_at": 1573813205133,
-            "updated_at": 1573813205133,
+            "created_at": 1580387427491,
+            "updated_at": 1580387427491,
             "paths": {
                 "/": []
             },
@@ -486,7 +486,7 @@
                 "endpoints": [
                     {
                         "name": "default",
-                        "target": "@SDK_IP@/",
+                        "target": "@SDK_IP_PORT@/",
                         "weight": 1,
                         "backup": false,
                         "type": "HTTP",
