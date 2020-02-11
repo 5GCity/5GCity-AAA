@@ -486,7 +486,7 @@
                 "endpoints": [
                     {
                         "name": "default",
-                        "target": "@SDK_IP_PORT@/",
+                        "target": "@SDK_IP@/",
                         "weight": 1,
                         "backup": false,
                         "type": "HTTP",

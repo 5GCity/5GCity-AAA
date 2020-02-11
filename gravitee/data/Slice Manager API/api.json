@@ -37,7 +37,7 @@
                     "DELETE"
                 ],
                 "groovy": {
-                    "onResponseContentScript": "/*\nif(response.status != 204){\n\treturn response.content\n}\n\nserviceId = request.pathInfo.split('/').last()\n\ndef post = new URL('@MONITORING_IP_PORT@/monitoring/monitoring/api/slice/' + serviceId).openConnection()\n\npost.setRequestMethod(\"DELETE\")\npost.setDoOutput(true)\npost.getResponseCode();\n\nreturn response.content\n*/"
+                    "onResponseContentScript": "if(response.status != 204){\n\treturn response.content\n}\n\nreturn response.content\n"
                 },
                 "description": "Description of the Groovy Gravitee Policy",
                 "enabled": true
@@ -50,7 +50,7 @@
                 ],
                 "groovy": {
                     "onRequestScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport io.gravitee.policy.api.PolicyChain;\nimport groovy.json.JsonSlurper\nimport groovy.json.JsonOutput\n\ndef jsonSlurper = new JsonSlurper();\n\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef username = auth_content.tenant;\ndef user_id = auth_content.os_id;\n\ndef user_roles = auth_content.realm_access.roles\n\nif(!user_roles.contains('User')){\n\n  \tresult.state = State.FAILURE;\n    result.code = 403;\n\n}\n\n\nif(!user_roles.contains('Administrator') && user_roles.contains('User')){\n\t// List Tenant Related\n\t// Users and not admins can only search for owned resource\n\trequest.parameters().clear();\n\trequest.parameters().put('user_id', Collections.singletonList(user_id));\n}\n\n",
-                    "onResponseContentScript": "import groovy.json.JsonOutput\nimport groovy.json.JsonSlurper\n\ndef jsonSlurper = new JsonSlurper()\n\nif (response.status == 500) {\n    def content = jsonSlurper.parseText(\"{}\")\n    return JsonOutput.toJson(content)\n}\n\n\ndef content = jsonSlurper.parseText(response.content)\n\ndef jsonSlurper2 = new JsonSlurper()\nusers = jsonSlurper2.parseText(new URL(\"@SM_IP_PORT@/api/v0.1/user\").text)\n\ndef tenantMap = [:]\nusers.each { tenantMap[it.id] = it.name }\n\nif (content instanceof List || content instanceof Collection ){\n  content.each{ it.tenant_name = tenantMap[it.user_id] } \n} else {\n  content.tenant_name = tenantMap[content.user_id]\n}\n\nreturn JsonOutput.toJson(content)"
+                    "onResponseContentScript": "import groovy.json.JsonOutput\nimport groovy.json.JsonSlurper\n\ndef jsonSlurper = new JsonSlurper()\n\nif (response.status == 500) {\n    def content = jsonSlurper.parseText(\"{}\")\n    return JsonOutput.toJson(content)\n}\n\n\ndef content = jsonSlurper.parseText(response.content)\n\ndef jsonSlurper2 = new JsonSlurper()\nusers = jsonSlurper2.parseText(new URL(\"http://192.168.1.2/api/v0.1/user\").text)\n\ndef tenantMap = [:]\nusers.each { tenantMap[it.id] = it.name }\n\nif (content instanceof List || content instanceof Collection ){\n  content.each{ it.tenant_name = tenantMap[it.user_id] } \n} else {\n  content.tenant_name = tenantMap[content.user_id]\n}\n\nreturn JsonOutput.toJson(content)"
                 },
                 "description": "Description of the Groovy Gravitee Policy",
                 "enabled": true
@@ -214,7 +214,7 @@
                 ],
                 "groovy": {
                     "onRequestScript": "",
-                    "onRequestContentScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport io.gravitee.policy.api.PolicyChain;\nimport groovy.json.JsonSlurper\nimport groovy.json.JsonOutput\n\ndef jsonSlurper = new JsonSlurper();\n\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef username = auth_content.tenant_label;\ndef user_id = auth_content.os_id;\n\ndef user_roles = auth_content.realm_access.roles\n\n// Only admins can create computes\nif(!user_roles.contains('Administrator')){\n\tresult.state = State.FAILURE;\n    result.code = 403;\n}\n\ndef request_content = jsonSlurper.parseText(request.content);\nif (!request_content){\n\tprintln \"Invalid request\";\n\tresult.state = State.FAILURE;\n    result.code = 400;\n}\n\n// Add physical network data\nif(!request_content.containsKey(\"physical_network_data\")){\n  request_content.physical_network_data = [:]\n}\n\nrequest_content.physical_network_data.auth_url = \"@OS_COMPUTE_AUTH_URL@\";\nrequest_content.physical_network_data.domain_name = \"@OS_COMPUTE_DOMAIN_NAME@\";\nrequest_content.physical_network_data.password = \"@OS_COMPUTE_PASSWORD@\";\nrequest_content.physical_network_data.project_name = \"@OS_COMPUTE_PROJECT_NAME@\";\nrequest_content.physical_network_data.username = \"@OS_COMPUTE_USERNAME@\";\nrequest_content.physical_network_data.neutron_phy_net_name=\"@neutron_phy_net_name@\"\n\n// Add user information\nrequest_content.user_id = user_id;\n//request_content.name = username;\n\nreturn JsonOutput.toJson(request_content);"
+                    "onRequestContentScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport io.gravitee.policy.api.PolicyChain;\nimport groovy.json.JsonSlurper\nimport groovy.json.JsonOutput\n\ndef jsonSlurper = new JsonSlurper();\n\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef username = auth_content.tenant_label;\ndef user_id = auth_content.os_id;\n\ndef user_roles = auth_content.realm_access.roles\n\n// Only admins can create computes\nif(!user_roles.contains('Administrator')){\n\tresult.state = State.FAILURE;\n    result.code = 403;\n}\n\ndef request_content = jsonSlurper.parseText(request.content);\nif (!request_content){\n\tprintln \"Invalid request\";\n\tresult.state = State.FAILURE;\n    result.code = 400;\n}\n\n// Add physical network data\nif(!request_content.containsKey(\"physical_network_data\")){\n  request_content.physical_network_data = [:]\n}\n\nrequest_content.physical_network_data.auth_url = \"default\";\nrequest_content.physical_network_data.domain_name = \"default\";\nrequest_content.physical_network_data.password = \"default\";\nrequest_content.physical_network_data.project_name = \"default\";\nrequest_content.physical_network_data.username = \"default\";\nrequest_content.physical_network_data.neutron_phy_net_name=\"default\"\n\n// Add user information\nrequest_content.user_id = user_id;\n//request_content.name = username;\n\nreturn JsonOutput.toJson(request_content);"
                 },
                 "description": "Description of the Groovy Gravitee Policy",
                 "enabled": true
@@ -309,7 +309,7 @@
                     "DELETE"
                 ],
                 "groovy": {
-                    "onResponseContentScript": "/*\nif(response.status != 204){\n\treturn response.content\n}\n/*\nserviceId = request.pathInfo.split('/').last()\n\ndef post = new URL('@MONITORING_IP_PORT@/monitoring/monitoring/api/service/' + serviceId).openConnection()\n\npost.setRequestMethod(\"DELETE\")\npost.setDoOutput(true)\npost.getResponseCode();\n\nreturn response.content\n*/"
+                    "onResponseContentScript": "/*\nif(response.status != 204){\n\treturn response.content\n}\n/*\nserviceId = request.pathInfo.split('/').last()\n\ndef post = new URL('http://192.168.1.1/monitoring/monitoring/monitoring/api/service/' + serviceId).openConnection()\n\npost.setRequestMethod(\"DELETE\")\npost.setDoOutput(true)\npost.getResponseCode();\n\nreturn response.content\n*/"
                 },
                 "description": "Description of the Groovy Gravitee Policy",
                 "enabled": true
@@ -332,7 +332,7 @@
                 ],
                 "groovy": {
                     "onRequestContentScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport io.gravitee.policy.api.PolicyChain;\nimport groovy.json.JsonSlurper\nimport groovy.json.JsonOutput\n\ndef jsonSlurper = new JsonSlurper();\n\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef username = auth_content.tenant;\ndef user_id = auth_content.os_id;\n\ndef request_content = jsonSlurper.parseText(request.content);\nif (!request_content){\n\tresult.state = State.FAILURE;\n    result.code = 400;\n}\n\n// Add user information\nrequest_content.user_id = user_id;\n\nreturn JsonOutput.toJson(request_content);",
-                    "onResponseContentScript": "import groovy.json.JsonSlurper\nimport groovy.json.JsonOutput\n\nif(response.status == 500){\n  def jsonSlurper = new JsonSlurper()\n  def content = jsonSlurper.parseText('{}')\n  return JsonOutput.toJson(content)\n}\n\ndef jsonSlurper = new JsonSlurper()\ndef content = jsonSlurper.parseText(response.content)\n\nif(response.status != 200){\n\treturn response.content\n}\n/*\nString id = content.id\n\ndef jsonSlurper2 = new JsonSlurper()\ndef nsBody =  jsonSlurper2.parseText('{ \"id\": \"' +id+'\"}')\n\ndef post = new URL('@MONITORING_IP_PORT@/monitoring/monitoring/api/service').openConnection()\n\n\ndef message = '{ \"id\": \"' +id+'\", \"slice\": \"'+content.slic3_id+'\"}'\npost.setRequestMethod(\"POST\")\npost.setDoOutput(true)\npost.setRequestProperty(\"Content-Type\", \"application/json\")\npost.getOutputStream().write(message.getBytes(\"UTF-8\"));\npost.getResponseCode();\n*/\nreturn response.content"
+                    "onResponseContentScript": "import groovy.json.JsonSlurper\nimport groovy.json.JsonOutput\n\nif(response.status == 500){\n  def jsonSlurper = new JsonSlurper()\n  def content = jsonSlurper.parseText('{}')\n  return JsonOutput.toJson(content)\n}\n\ndef jsonSlurper = new JsonSlurper()\ndef content = jsonSlurper.parseText(response.content)\n\nif(response.status != 200){\n\treturn response.content\n}\n/*\nString id = content.id\n\ndef jsonSlurper2 = new JsonSlurper()\ndef nsBody =  jsonSlurper2.parseText('{ \"id\": \"' +id+'\"}')\n\ndef post = new URL('http://192.168.1.1/monitoring/monitoring/monitoring/api/service').openConnection()\n\n\ndef message = '{ \"id\": \"' +id+'\", \"slice\": \"'+content.slic3_id+'\"}'\npost.setRequestMethod(\"POST\")\npost.setDoOutput(true)\npost.setRequestProperty(\"Content-Type\", \"application/json\")\npost.getOutputStream().write(message.getBytes(\"UTF-8\"));\npost.getResponseCode();\n*/\nreturn response.content"
                 },
                 "description": "Description of the Groovy Gravitee Policy",
                 "enabled": true
@@ -360,7 +360,7 @@
                     "POST"
                 ],
                 "groovy": {
-                    "onRequestContentScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport io.gravitee.policy.api.PolicyChain;\nimport groovy.json.JsonSlurper\nimport groovy.json.JsonOutput\n\ndef jsonSlurper = new JsonSlurper();\n\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef username = auth_content.tenant_label;\ndef user_id = auth_content.os_id;\n\ndef user_roles = auth_content.realm_access.roles\n\n// Only admins can create computes\nif(!user_roles.contains('Administrator')){\n\tresult.state = State.FAILURE;\n    result.code = 403;\n}\n\ndef request_content = jsonSlurper.parseText(request.content);\nif (!request_content){\n\tresult.state = State.FAILURE;\n    result.code = 400;\n}\n\n// Add compute data\nif(!request_content.containsKey(\"compute_data\")){\n  request_content.compute_data = [:]\n}\nif (request_content.compute_type == \"openstack\"){\n  request_content.compute_data.auth_url = \"@OS_COMPUTE_AUTH_URL@\";\n  request_content.compute_data.domain_name = \"@OS_COMPUTE_DOMAIN_NAME@\";\n  request_content.compute_data.password = \"@OS_COMPUTE_PASSWORD@\";\n  request_content.compute_data.project_name = \"@OS_COMPUTE_PROJECT_NAME@\";\n  request_content.compute_data.username = \"@OS_COMPUTE_USERNAME@\";\n} else if(request_content.compute_type == \"fos\"){\n  request_content.compute_data.auth_url = \"@FOS_COMPUTE_AUTH_URL@\";\n  request_content.compute_data.domain_name = \"@FOS_COMPUTE_DOMAIN_NAME@\";\n  request_content.compute_data.password = \"@FOS_COMPUTE_PASSWORD@\";\n  request_content.compute_data.project_name = \"@FOS_COMPUTE_PROJECT_NAME@\";\n  request_content.compute_data.username = \"@FOS_COMPUTE_USERNAME@\";\n} else {\n  \tresult.state = State.FAILURE;\n    result.code = 400;\n}\n\n// Add user information\nrequest_content.user_id = user_id;\n\nreturn JsonOutput.toJson(request_content);"
+                    "onRequestContentScript": "import io.gravitee.policy.groovy.PolicyResult.State\nimport io.gravitee.policy.api.PolicyChain;\nimport groovy.json.JsonSlurper\nimport groovy.json.JsonOutput\n\ndef jsonSlurper = new JsonSlurper();\n\ndef auth_content = jsonSlurper.parseText(context.attributes['oauth.payload']);\ndef username = auth_content.tenant_label;\ndef user_id = auth_content.os_id;\n\ndef user_roles = auth_content.realm_access.roles\n\n// Only admins can create computes\nif(!user_roles.contains('Administrator')){\n\tresult.state = State.FAILURE;\n    result.code = 403;\n}\n\ndef request_content = jsonSlurper.parseText(request.content);\nif (!request_content){\n\tresult.state = State.FAILURE;\n    result.code = 400;\n}\n\n// Add compute data\nif(!request_content.containsKey(\"compute_data\")){\n  request_content.compute_data = [:]\n}\nif (request_content.compute_type == \"openstack\"){\n  request_content.compute_data.auth_url = \"default\";\n  request_content.compute_data.domain_name = \"default\";\n  request_content.compute_data.password = \"default\";\n  request_content.compute_data.project_name = \"default\";\n  request_content.compute_data.username = \"default\";\n} else if(request_content.compute_type == \"fos\"){\n  request_content.compute_data.auth_url = \"default\";\n  request_content.compute_data.domain_name = \"default\";\n  request_content.compute_data.password = \"default\";\n  request_content.compute_data.project_name = \"default\";\n  request_content.compute_data.username = \"default\";\n} else {\n  \tresult.state = State.FAILURE;\n    result.code = 400;\n}\n\n// Add user information\nrequest_content.user_id = user_id;\n\nreturn JsonOutput.toJson(request_content);"
                 },
                 "description": "Description of the Groovy Gravitee Policy",
                 "enabled": true
@@ -384,7 +384,7 @@
             "type": "oauth2",
             "enabled": true,
             "configuration": {
-                "authorizationServerUrl": "@DASH_IP@/auth/realms/5gcity",
+                "authorizationServerUrl": "http://191.168.1.69/auth/realms/5gcity",
                 "introspectionEndpoint": "/protocol/openid-connect/token/introspect",
                 "introspectionEndpointMethod": "POST",
                 "scopeSeparator": " ",
@@ -413,7 +413,7 @@
     "pages": [],
     "plans": [
         {
-            "id": "496d9af3-63c6-4959-ad9a-f363c639590b",
+            "id": "bb1fdaed-2915-49fb-9fda-ed291599fb82",
             "name": "Oauth2",
             "description": "Plan using Oauth2",
             "validation": "MANUAL",
@@ -422,12 +422,12 @@
             "type": "API",
             "status": "PUBLISHED",
             "apis": [
-                "daa39ef2-1e5b-4b5e-a39e-f21e5b5b5e85"
+                "d753b3e1-4e37-4c5f-93b3-e14e37dc5fe2"
             ],
             "order": 0,
             "characteristics": [],
-            "created_at": 1580386742140,
-            "updated_at": 1580386742140,
+            "created_at": 1580387856284,
+            "updated_at": 1580387856284,
             "paths": {
                 "/": []
             },
@@ -468,7 +468,7 @@
                 "endpoints": [
                     {
                         "name": "default",
-                        "target": "@SM_IP_PORT@/api/v0.1",
+                        "target": "http://192.168.1.2/api/v0.1",
                         "weight": 1,
                         "backup": false,
                         "type": "HTTP",

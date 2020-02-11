@@ -13,8 +13,9 @@ services:
       args:
         #AUTH_SERVER_URLAUTH_SERVER_URL
         - API_BASE_URL=SERVER_NAME
-        - API_MONITORING=MONITORING_SERVER
+        - API_MONITORING=MONITORING_GRAFANA
         #- AUTH_SERVER_URL=http://SERVER_NAME/auth
+    restart: always
     volumes:
       - DASH_PATH/public/keycloak.json:/www/keycloak.json
 
@@ -31,6 +32,7 @@ services:
   postgresdb:
     hostname: postgresql
     image: postgres:11
+    restart: always
     environment:
       - POSTGRES_DB=keycloak
       - POSTGRES_USER=keycloak
@@ -41,6 +43,7 @@ services:
   elasticsearch:
     hostname: aaaelasticsearch
     image: docker.elastic.co/elasticsearch/elasticsearch:5.4.3
+    restart: always
     volumes:
       - elastic_data:/usr/share/elasticsearch/data
     environment:
@@ -60,6 +63,7 @@ services:
   mongodb:
     hostname: aaamongodb
     image: mongo:3.4
+    restart: always
     volumes:
       - mongo_data:/data/db
 
@@ -69,6 +73,7 @@ services:
 
   gravitee_gateway:
     image: graviteeio/gateway:1.21.3
+    restart: always
     depends_on:
       - mongodb
       - elasticsearch
@@ -82,6 +87,7 @@ services:
 
   management_api:
     image: graviteeio/management-api:1.21.3
+    restart: always
     depends_on:
       - mongodb
       - elasticsearch
@@ -94,6 +100,7 @@ services:
 
   management_ui:
     image: graviteeio/management-ui:1.21.3
+    restart: always
     volumes:
       - ./logs/management-ui:/var/log/httpd
     environment:
@@ -108,6 +115,7 @@ services:
   keycloak:
     hostname: keycloak
     image: jboss/keycloak:6.0.1
+    restart: always
     depends_on:
       - postgresdb
     links:

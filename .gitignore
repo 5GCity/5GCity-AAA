@@ -76,3 +76,6 @@ venv
 Pipfile.lock
 __pycache__/
 .python-version
+aaa_compose/compose-aaa.yml
+aaa_compose/gravitee/api/gravitee.yml
+aaa_compose/nginx/http/nginx.conf

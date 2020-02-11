@@ -32,8 +32,8 @@ class Configuration(Command):
         parameters = {
             "SERVER_NAME": "Insert the Dashboard server name to be used with the http protocol."
                            "E.g. IP: http://192.168.1.1 or FQDN: http://5g-dashboard.i2cat.net: ",
-            "MONITORING_SERVER": "Insert the monitoring server to be used."
-                                 "E.g., http://192.168.1.1 or FQDN: http://monitoring.5gcity.com: "
+            "MONITORING_GRAFANA": "Insert the Grafana monitoring UI server to be used."
+                                  "E.g., http://192.168.1.1 or FQDN: http://monitoring.5gcity.com: "
         }
 
         for key, value in parameters.items():
@@ -72,8 +72,8 @@ class Configuration(Command):
 
                 if key in base["services"]["dashboard"]["build"]["args"][enum]:
                     base["services"]["dashboard"]["build"]["args"][enum] = \
-                    base["services"]["dashboard"]["build"]["args"][
-                        enum].replace(key, mcs.VALUES[key], 1)
+                        base["services"]["dashboard"]["build"]["args"][
+                            enum].replace(key, mcs.VALUES[key], 1)
 
         for enum, _ in enumerate(base["services"]["dashboard"]["volumes"]):
             base["services"]["dashboard"]["volumes"][enum] = base["services"]["dashboard"]["volumes"][enum].replace(
