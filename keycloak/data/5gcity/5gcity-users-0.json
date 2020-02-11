@@ -31,7 +31,6 @@
     "requiredActions" : [ ],
     "realmRoles" : [ "offline_access", "Administrator" ],
     "clientRoles" : {
-      "realm-management" : [ "view-users" ],
       "account" : [ "manage-account", "view-profile" ]
     },
     "notBefore" : 0,
@@ -53,14 +52,14 @@
     },
     "credentials" : [ {
       "type" : "password",
-      "hashedSaltedValue" : "q2DMuFMAvBsEw2fw5Uk+87kknA4YrQvFW1+jzT43Z87iuZ4XMAFsVB66XxdrZKW9k4pl3H3s5C/W7HMhJH0/Dg==",
-      "salt" : "XYzcg5aYntMABEfuT4SfJQ==",
+      "hashedSaltedValue" : "uJdsFmjjIHiw0KjtTOgA7ULDxNE7BqOJKzYaElDqlBixav2hwgr+ssUB2DXaWGCdHCJN/2PMPD+MmWVRlSTQVQ==",
+      "salt" : "7slqwD5HnGlJYHWCGIgfNg==",
       "hashIterations" : 27500,
       "counter" : 0,
       "algorithm" : "pbkdf2-sha256",
       "digits" : 0,
       "period" : 0,
-      "createdDate" : 1564496832801,
+      "createdDate" : 1581421173873,
       "config" : { }
     } ],
     "disableableCredentialTypes" : [ "password" ],
@@ -88,14 +87,14 @@
     },
     "credentials" : [ {
       "type" : "password",
-      "hashedSaltedValue" : "YTPgtTG8h32P/FBPZWy+9cEgzTOOkhfeRBGz+0qMQYUSNlX+ocjbmSW1m7YyYamIJEJZ0E5IbbY1o4IxUdPFvg==",
-      "salt" : "qJcOxSvdm/rDR2sdAZAdDA==",
+      "hashedSaltedValue" : "aPT68LizYlyaY51K8m9UivzvkRctJOzt/JGvJM+HJe80xgt43MqIHCTir8iLFwErKMIt+xw19cmfgwH6hzPCfA==",
+      "salt" : "O7yJc2ViZGnxVQSXuNG+XA==",
       "hashIterations" : 27500,
       "counter" : 0,
       "algorithm" : "pbkdf2-sha256",
       "digits" : 0,
       "period" : 0,
-      "createdDate" : 1562841949108,
+      "createdDate" : 1581421208261,
       "config" : { }
     } ],
     "disableableCredentialTypes" : [ "password" ],
